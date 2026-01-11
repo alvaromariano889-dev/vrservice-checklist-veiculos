@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF
 <title>Checklist Diário de Veículos</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -20,7 +20,7 @@ body {
   margin: auto;
   background: #fff;
   padding: 20px;
-  border-radius
+  border-radius: 6px;
 }
 
 .logo, h2, .datetime {
@@ -175,5 +175,54 @@ button:disabled {
     </div>
   </div>
 
-  <button onc
+  <button onclick="irParaChecklist()">➡️ Continuar para checklist</button>
+</div>
 
+<!-- TELA 2: CHECKLIST -->
+<div class="container tela" id="tela-checklist">
+  <div class="resumo">
+    <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
+    <p><strong>Veículo:</strong> <span id="resumoVeiculo"></span></p>
+    <p><strong>Tipo:</strong> <span id="resumoTipo"></span></p>
+    <p><strong>KM ou Horímetro:</strong> <input type="number" id="kmHorimetro" min="0"></p>
+  </div>
+
+  <table class="table" id="tabela">
+    <thead>
+      <tr>
+        <th>ITEM</th>
+        <th>BOM</th>
+        <th>ANORMAL</th>
+        <th>N.A.</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="obs-box">
+    <label>Observações (obrigatório se houver item ANORMAL)</label>
+    <textarea id="obs" rows="3" placeholder="Descreva qualquer irregularidade encontrada..."></textarea>
+  </div>
+
+  <button onclick="voltarSelecao()">⬅️ Voltar</button>
+  <button id="salvar" onclick="salvarChecklist()" disabled>💾 Salvar Checklist</button>
+  <button id="pdfBtn" onclick="gerarPDF()">📄 Gerar PDF</button>
+</div>
+
+<script>
+// modelos de checklist (sem KM/Horímetro na tabela)
+const modelos = {
+  empilhadeira: [
+    "Pneus e Rodas (calibragem)",
+    "Garfos (patins) e mastro",
+    "Vazamentos",
+    "Nível de óleo do motor",
+    "Nível de óleo hidráulico",
+    "Freios",
+    "Buzina / sinalização"
+  ],
+  carro: [
+    "Luzes",
+    "Vazamentos",
+    "Espelhos e vidros",
+    "
