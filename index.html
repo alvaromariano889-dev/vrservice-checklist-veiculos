@@ -22,7 +22,7 @@ body {
   padding: 20px;
   border-radius: 6px;
 }
-.logo, h2, .datetime {
+.Logo, h2, .datetime {
   text-align: center;
 }
 label {
@@ -131,9 +131,9 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       <label>Motorista / Operador</label>
       <input list="motoristas" id="motorista" placeholder="Digite ou selecione">
       <datalist id="motoristas">
-        <option value="João Silva">
-        <option value="Maria Souza">
-        <option value="Carlos Lima">
+        <option value="Aryson">
+        <option value="Alvaro">
+        <option value="Diogenes">
       </datalist>
     </div>
     <div>
@@ -141,8 +141,6 @@ button:disabled { background: #ccc; cursor: not-allowed; }
       <input list="veiculos" id="veiculo" placeholder="Digite ou selecione">
       <datalist id="veiculos">
         <option value="ABC-1234">
-        <option value="DEF-5678">
-        <option value="GHI-9012">
       </datalist>
     </div>
     <div>
@@ -190,7 +188,7 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   <button id="pdfBtn" onclick="gerarPDF()">📄 Gerar PDF</button>
 
   <div class="rodape">
-    Endereço da empresa: Rua Exemplo, 123 - Cidade - CEP 00000-000
+    Endereço da empresa:  Av. Beira Rio Sul, 1169 - Jardim California, - Cuiabá - CEP 78070-500
   </div>
 </div>
 
@@ -277,9 +275,9 @@ function salvarChecklist(){
 
 // gerar PDF
 function gerarPDF(){
-  const element = document.getElementById('tela-checklist'); // CORRIGIDO
+  const element = document.getElementById('pdf-content'); // captura toda área do PDF
 
-  // Destacar itens ANORMAIS em vermelho para PDF
+  // Destacar itens ANORMAIS em vermelho
   document.querySelectorAll('#tabela tbody tr').forEach(tr=>{
     if(tr.classList.contains('anormal')){
       tr.classList.add('anormal-pdf');
@@ -288,6 +286,28 @@ function gerarPDF(){
     }
   });
 
+  // Substituir textarea de observações por div temporária
+  const obs = document.getElementById('obs');
+  const obsDiv = document.createElement('div');
+  obsDiv.innerText = obs.value;
+  obsDiv.style.border = "1px solid #ccc";
+  obsDiv.style.padding = "8px";
+  obsDiv.style.borderRadius = "4px";
+  obsDiv.style.minHeight = "50px";
+  obsDiv.id = "obs-pdf";
+  obs.parentNode.replaceChild(obsDiv, obs);
+
+  // Colocar data e hora no PDF
+  const datetimeSpan = document.getElementById('datetime-pdf');
+  datetimeSpan.innerText = new Date().toLocaleString();
+
+  // Colocar valor do KM/Horímetro no PDF
+  const kmInput = document.getElementById('kmHorimetro');
+  const kmSpan = document.createElement('span');
+  kmSpan.innerText = kmInput.value;
+  kmInput.parentNode.replaceChild(kmSpan, kmInput);
+
+  // Gerar PDF
   const opt = {
     margin: 10,
     filename: `Checklist_${new Date().toISOString().slice(0,10)}.pdf`,
@@ -296,7 +316,11 @@ function gerarPDF(){
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
   };
 
-  html2pdf().set(opt).from(element).save();
+  html2pdf().set(opt).from(element).save().then(()=>{
+    // Depois do PDF, voltar KM/Horímetro e Observações ao normal
+    kmSpan.parentNode.replaceChild(kmInput, kmSpan);
+    obsDiv.parentNode.replaceChild(obs, obsDiv);
+  });
 }
 
 // registrar service worker
@@ -309,4 +333,5 @@ if('serviceWorker' in navigator){
 </script>
 </body>
 </html>
+
 
