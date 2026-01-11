@@ -101,6 +101,13 @@
     <div class="info" id="info-condutor"></div>
     <div class="info" id="info-veiculo"></div>
     <div class="info" id="info-periodo"></div>
+    <label style="margin-top:20px;">Observações (obrigatório se houver item Anormal)</label>
+<textarea id="observacoes" rows="4" style="width:100%; padding:10px;"></textarea>
+
+<button id="btnSalvar" type="button" onclick="salvarChecklist()" disabled>
+  Salvar Checklist
+</button>
+
   </div>
 
   <h2>Checklist</h2>
@@ -321,19 +328,45 @@
     const agora = new Date();
     document.getElementById('info-data').innerText =
       'Data/Hora: ' + agora.toLocaleString();
-
     document.getElementById('info-condutor').innerText =
       'Condutor: ' + condutor;
-
     document.getElementById('info-veiculo').innerText =
       'Veículo: ' + veiculo;
-
     document.getElementById('info-periodo').innerText =
       'Período: ' + periodo;
   }
+
+  function validarChecklist() {
+    const grupos = {};
+    document.querySelectorAll('input[type="radio"]').forEach(r => {
+      grupos[r.name] = grupos[r.name] || false;
+      if (r.checked) grupos[r.name] = true;
+    });
+
+    const tudoMarcado = Object.values(grupos).every(v => v);
+    const anormal = document.querySelectorAll('input[type="radio"]:checked')
+      .length > 0 &&
+      [...document.querySelectorAll('input[type="radio"]:checked')]
+      .some(r => r.parentElement.children[2] === r);
+
+    const obs = document.getElementById('observacoes').value.trim();
+
+    if (!tudoMarcado) return false;
+    if (anormal && !obs) return false;
+
+    return true;
+  }
+
+  function salvarChecklist() {
+    alert('Checklist validado! Próxima etapa: PDF.');
+  }
+
+  document.addEventListener('change', () => {
+    document.getElementById('btnSalvar').disabled = !validarChecklist();
+  });
 </script>
-</body>
-</html>
+
+
 
 
 
