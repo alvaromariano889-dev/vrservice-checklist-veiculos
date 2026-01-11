@@ -1,73 +1,199 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Checklist Diário de Veículos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Checklist Diário</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="manifest" href="manifest.json">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 10px;
+}
 
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js");
-    }
-  </script>
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 6px;
+}
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 15px;
-    }
-    button {
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-    }
-    .hidden {
-      display: none;
-    }
-  </style>
+.logo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+h2 {
+  text-align: center;
+  margin: 5px 0 5px;
+}
+
+.datetime {
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.info div {
+  flex: 1 1 200px;
+}
+
+label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+input, select {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.table th, .table td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: center;
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+
+.bom { background: #c8f7c5; }
+.anormal { background: #f7c5c5; }
+.na { background: #c5d9f7; }
+
+.btns {
+  margin-top: 20px;
+  text-align: center;
+}
+
+button {
+  padding: 10px 25px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+</style>
 </head>
 
 <body>
 
-<h2>Checklist Diário de Segurança do Veículo</h2>
+<div class="container">
 
-<label>Nome do Motorista</label>
-<input type="text" id="motorista">
+  <div class="logo">
+    <strong>LOGO DA EMPRESA</strong>
+  </div>
 
-<label>Veículo (Placa / Patrimônio)</label>
-<input type="text" id="veiculo">
+  <h2>Checklist Diário de Inspeção</h2>
+  <div class="datetime" id="datetime"></div>
 
-<button onclick="iniciarChecklist()">Iniciar Checklist</button>
+  <div class="info">
+    <div>
+      <label>Motorista / Operador</label>
+      <input type="text">
+    </div>
+    <div>
+      <label>Veículo / Placa</label>
+      <input type="text">
+    </div>
+    <div>
+      <label>Tipo de Veículo</label>
+      <select>
+        <option>Empilhadeira</option>
+        <option>Carro</option>
+        <option>Caminhão Baú</option>
+        <option>Caminhão Aberto (F400)</option>
+      </select>
+    </div>
+  </div>
 
-<div id="checklist" class="hidden">
-  <h3>Itens Básicos</h3>
+  <table class="table" id="checklist">
+    <thead>
+      <tr>
+        <th>ITEM</th>
+        <th>BOM</th>
+        <th>ANORMAL</th>
+        <th>N.A.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Pneus e Rodas</td>
+        <td><input type="radio" name="item1" onclick="marcar(this,'bom')"></td>
+        <td><input type="radio" name="item1" onclick="marcar(this,'anormal')"></td>
+        <td><input type="radio" name="item1" onclick="marcar(this,'na')"></td>
+      </tr>
+      <tr>
+        <td>Luzes</td>
+        <td><input type="radio" name="item2" onclick="marcar(this,'bom')"></td>
+        <td><input type="radio" name="item2" onclick="marcar(this,'anormal')"></td>
+        <td><input type="radio" name="item2" onclick="marcar(this,'na')"></td>
+      </tr>
+      <tr>
+        <td>Vazamentos</td>
+        <td><input type="radio" name="item3" onclick="marcar(this,'bom')"></td>
+        <td><input type="radio" name="item3" onclick="marcar(this,'anormal')"></td>
+        <td><input type="radio" name="item3" onclick="marcar(this,'na')"></td>
+      </tr>
+    </tbody>
+  </table>
 
-  <label><input type="checkbox"> Freios funcionando corretamente</label><br>
-  <label><input type="checkbox"> Luzes funcionando</label><br>
-  <label><input type="checkbox"> Pneus em boas condições</label><br>
-  <label><input type="checkbox"> Sem vazamentos visíveis</label><br>
+  <div class="btns">
+    <button id="salvar" disabled>Salvar Checklist</button>
+  </div>
 
-  <button onclick="salvarChecklist()">Salvar Checklist</button>
 </div>
 
 <script>
-  function iniciarChecklist() {
-    const motorista = document.getElementById("motorista").value;
-    const veiculo = document.getElementById("veiculo").value;
+function atualizarDataHora() {
+  const agora = new Date();
+  document.getElementById("datetime").innerText =
+    agora.toLocaleDateString("pt-BR") + " " +
+    agora.toLocaleTimeString("pt-BR");
+}
+setInterval(atualizarDataHora, 1000);
+atualizarDataHora();
 
-    if (motorista === "" || veiculo === "") {
-      alert("Preencha o nome do motorista e o veículo.");
-      return;
-    }
+function marcar(radio, tipo) {
+  const linha = radio.closest("tr");
+  linha.classList.remove("bom", "anormal", "na");
+  linha.classList.add(tipo);
+  validar();
+}
 
-    document.getElementById("checklist").classList.remove("hidden");
-  }
+function validar() {
+  const linhas = document.querySelectorAll("#checklist tbody tr");
+  let completo = true;
 
-  function salvarChecklist() {
-    alert("Checklist salvo com sucesso.");
-  }
+  linhas.forEach(linha => {
+    const marcado = linha.querySelector("input[type=radio]:checked");
+    if (!marcado) completo = false;
+  });
+
+  document.getElementById("salvar").disabled = !completo;
+}
 </script>
 
 </body>
