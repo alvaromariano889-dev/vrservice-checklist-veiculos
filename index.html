@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 
+<!-- PDF A4 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
@@ -13,8 +14,8 @@ body {
   font-family: Arial, sans-serif;
   background: #f4f4f4;
   padding: 10px;
-  margin: 0;
 }
+
 .container {
   max-width: 900px;
   margin: auto;
@@ -22,14 +23,21 @@ body {
   padding: 20px;
   border-radius: 6px;
 }
-.Logo, h2, .datetime {
+
+.logo { text-align:center; margin-bottom:10px; }
+.logo img { max-width:150px; }
+
+h2, .datetime {
   text-align: center;
+  margin: 5px 0;
 }
+
 label {
   font-weight: bold;
   display: block;
   margin-top: 8px;
 }
+
 input, select, textarea {
   width: 100%;
   padding: 8px;
@@ -37,6 +45,7 @@ input, select, textarea {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
 button {
   margin-top: 15px;
   padding: 12px 24px;
@@ -47,19 +56,34 @@ button {
   background: #0a7cff;
   color: white;
 }
-button:hover:not(:disabled) { background: #0962d8; }
-button:disabled { background: #ccc; cursor: not-allowed; }
+
+button:hover:not(:disabled) {
+  background: #0962d8;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
 
 /* telas */
-.tela { display: none; }
-.tela.ativa { display: block; }
+.tela {
+  display: none;
+}
+.tela.ativa {
+  display: block;
+}
 
-/* grid responsivo */
+/* seleção */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 15px;
   margin-top: 20px;
+}
+.grid > div {
+  flex: 1 1 280px;
+  min-width: 250px;
 }
 
 /* resumo */
@@ -69,7 +93,10 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   border-radius: 6px;
   margin: 15px 0;
 }
-.resumo p { margin: 5px 0; font-size: 16px; }
+.resumo p {
+  margin: 5px 0;
+  font-size: 16px;
+}
 
 /* tabela */
 .table {
@@ -92,20 +119,24 @@ button:disabled { background: #ccc; cursor: not-allowed; }
   width: 40%;
 }
 
-/* cores das linhas */
 .bom { background: #c8f7c5 !important; }
 .anormal { background: #fff3b0 !important; }
 .na { background: #c5d9f7 !important; }
 
-.obs-box { margin: 20px 0; }
-#kmHorimetro { width: 200px !important; display: inline-block; }
+/* PDF destaque ANORMAL */
+.anormal-pdf { background: #ff4d4f !important; color: white !important; }
 
-/* rodapé para PDF */
-.rodape {
-  text-align: center;
-  font-size: 12px;
-  margin-top: 20px;
+.obs-box {
+  margin: 20px 0;
 }
+
+#kmHorimetro {
+  width: 200px !important;
+  display: inline-block;
+}
+
+/* rodape */
+.rodape { text-align:center; margin-top:20px; font-size:14px; }
 
 /* PDF otimizado */
 @media print {
@@ -115,171 +146,190 @@ button:disabled { background: #ccc; cursor: not-allowed; }
 }
 </style>
 </head>
+
 <body>
 
-<div class="container">
-  <div class="logo"><strong>LOGO DA EMPRESA</strong></div>
-  <h2>Checklist Diário de Inspeção</h2>
-  <div class="datetime" id="datetime"></div>
-</div>
+<div id="pdf-content">
 
-<!-- TELA 1: SELEÇÃO -->
-<div class="container tela ativa" id="tela-selecao">
-  <h3>📋 Dados iniciais</h3>
-  <div class="grid">
-    <div>
-      <label>Motorista / Operador</label>
-      <input list="motoristas" id="motorista" placeholder="Digite ou selecione">
-      <datalist id="motoristas">
-        <option value="Aryson">
-        <option value="Alvaro">
-        <option value="Diogenes">
-      </datalist>
+  <!-- LOGO E TITULO -->
+  <div class="container">
+    <div class="logo">
+      <img src="Logo.png" alt="Logo da Empresa">
     </div>
-    <div>
-      <label>Veículo / Placa ou Patrimônio</label>
-      <input list="veiculos" id="veiculo" placeholder="Digite ou selecione">
-      <datalist id="veiculos">
-        <option value="ABC-1234">
-      </datalist>
+    <h2>Checklist Diário de Inspeção</h2>
+    <p style="text-align:center">CNPJ: 00.000.000/0000-00</p>
+    <div class="datetime" id="datetime"></div>
+  </div>
+
+  <!-- TELA 1: SELEÇÃO -->
+  <div class="container tela ativa" id="tela-selecao">
+    <h3>📋 Dados iniciais</h3>
+
+    <div class="grid">
+      <div>
+        <label>Motorista / Operador</label>
+        <select id="motorista">
+          <option value="">Digite ou selecione</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Veículo / Placa ou Patrimônio</label>
+        <select id="veiculo">
+          <option value="">Digite ou selecione</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Tipo de Veículo</label>
+        <select id="tipo">
+          <option value="">Selecione</option>
+          <option value="empilhadeira">Empilhadeira</option>
+          <option value="carro">Carro</option>
+          <option value="bau">Caminhão Baú</option>
+          <option value="f400">Caminhão Aberto (F400)</option>
+        </select>
+      </div>
     </div>
-    <div>
-      <label>Tipo de Veículo</label>
-      <select id="tipo">
-        <option value="">Selecione</option>
-        <option value="empilhadeira">Empilhadeira</option>
-        <option value="carro">Carro</option>
-        <option value="bau">Caminhão Baú</option>
-        <option value="f400">Caminhão Aberto (F400)</option>
-      </select>
+
+    <button onclick="irParaChecklist()">➡️ Continuar para checklist</button>
+  </div>
+
+  <!-- TELA 2: CHECKLIST -->
+  <div class="container tela" id="tela-checklist">
+    <div class="resumo">
+      <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
+      <p><strong>Veículo:</strong> <span id="resumoVeiculo"></span></p>
+      <p><strong>Tipo:</strong> <span id="resumoTipo"></span></p>
+      <p><strong>KM ou Horímetro:</strong> <input type="number" id="kmHorimetro" min="0"></p>
+      <p><strong>Data e Hora:</strong> <span id="datetime-pdf"></span></p>
+    </div>
+
+    <table class="table" id="tabela">
+      <thead>
+        <tr>
+          <th>ITEM</th>
+          <th>BOM</th>
+          <th>ANORMAL</th>
+          <th>N.A.</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="obs-box">
+      <label>Observações (obrigatório se houver item ANORMAL)</label>
+      <textarea id="obs" rows="3" placeholder="Descreva qualquer irregularidade encontrada..."></textarea>
+    </div>
+
+    <button onclick="voltarSelecao()">⬅️ Voltar</button>
+    <button id="salvar" onclick="salvarChecklist()" disabled>💾 Salvar Checklist</button>
+    <button id="pdfBtn" onclick="gerarPDF()">📄 Gerar PDF</button>
+
+    <div class="rodape">
+      Endereço da empresa: Rua Exemplo, 123 - Cidade - CEP 00000-000
     </div>
   </div>
-  <button onclick="irParaChecklist()">➡️ Continuar para checklist</button>
-</div>
 
-<!-- TELA 2: CHECKLIST -->
-<div class="container tela" id="tela-checklist">
-  <div class="resumo">
-    <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
-    <p><strong>Veículo:</strong> <span id="resumoVeiculo"></span></p>
-    <p><strong>Tipo:</strong> <span id="resumoTipo"></span></p>
-    <p><strong>KM ou Horímetro:</strong> <input type="number" id="kmHorimetro" min="0"></p>
-  </div>
-
-  <table class="table" id="tabela">
-    <thead>
-      <tr>
-        <th>ITEM</th>
-        <th>BOM</th>
-        <th>ANORMAL</th>
-        <th>N.A.</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <div class="obs-box">
-    <label>Observações (obrigatório se houver item ANORMAL)</label>
-    <textarea id="obs" rows="3" placeholder="Descreva qualquer irregularidade encontrada..."></textarea>
-  </div>
-
-  <button onclick="voltarSelecao()">⬅️ Voltar</button>
-  <button id="salvar" onclick="salvarChecklist()" disabled>💾 Salvar Checklist</button>
-  <button id="pdfBtn" onclick="gerarPDF()">📄 Gerar PDF</button>
-
-  <div class="rodape">
-    Endereço da empresa:  Av. Beira Rio Sul, 1169 - Jardim California, - Cuiabá - CEP 78070-500
-  </div>
 </div>
 
 <script>
-// mostrar data e hora
+// PREENCHE DATA E HORA
 document.getElementById('datetime').innerText = new Date().toLocaleString();
 
-// checklist por tipo
+// MODELOS DE CHECKLIST
 const modelos = {
-  empilhadeira: ["Pneus e Rodas", "Garfos e mastro", "Vazamentos","Óleo motor","Óleo hidráulico","Freios","Buzina"],
-  carro: ["Luzes","Vazamentos","Espelhos e vidros","Freios","Óleo motor","Pneus e rodas"],
-  bau: ["Luzes","Vazamentos","Freios","Pneus e rodas","Portas e travas"],
-  f400: ["Luzes","Vazamentos","Freios","Pneus e rodas","Caçamba / carroceria"]
+  empilhadeira: [
+    "Pneus e Rodas (calibragem)",
+    "Garfos (patins) e mastro",
+    "Vazamentos",
+    "Nível de óleo do motor",
+    "Nível de óleo hidráulico",
+    "Freios",
+    "Buzina / sinalização"
+  ],
+  carro: [
+    "Luzes",
+    "Vazamentos",
+    "Espelhos e vidros"
+  ],
+  bau: ["Pneus","Luzes","Vazamentos","Freios"],
+  f400: ["Pneus","Luzes","Vazamentos","Freios"]
 };
 
-// mostrar checklist
-function irParaChecklist() {
+// FUNÇÕES PARA TROCAR DE TELA
+function irParaChecklist(){
   const motorista = document.getElementById('motorista').value;
   const veiculo = document.getElementById('veiculo').value;
   const tipo = document.getElementById('tipo').value;
-  if(!motorista||!veiculo||!tipo){ alert('Preencha todos os campos!'); return; }
+
+  if(!motorista || !veiculo || !tipo){
+    alert("Preencha todos os campos antes de continuar!");
+    return;
+  }
+
   document.getElementById('resumoMotorista').innerText = motorista;
   document.getElementById('resumoVeiculo').innerText = veiculo;
   document.getElementById('resumoTipo').innerText = tipo;
-  const tbody = document.querySelector('#tabela tbody'); tbody.innerHTML='';
+
+  // Preenche a tabela de itens
+  const tbody = document.querySelector('#tabela tbody');
+  tbody.innerHTML = "";
   modelos[tipo].forEach(item=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${item}</td>
-      <td><input type="radio" name="${item}" value="bom"></td>
-      <td><input type="radio" name="${item}" value="anormal"></td>
-      <td><input type="radio" name="${item}" value="na"></td>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${item}</td>
+      <td class="bom" onclick="selecionar(this)">✔</td>
+      <td class="anormal" onclick="selecionar(this)">⚠</td>
+      <td class="na" onclick="selecionar(this)">N.A</td>
+    `;
     tbody.appendChild(tr);
   });
+
   document.getElementById('tela-selecao').classList.remove('ativa');
   document.getElementById('tela-checklist').classList.add('ativa');
+  verificarSalvar();
 }
 
-// voltar tela
+// SELEÇÃO DE CELULAS
+function selecionar(td){
+  td.parentNode.querySelectorAll('td').forEach(cell=>{
+    cell.style.backgroundColor = ""; // reset
+  });
+  td.style.backgroundColor = td.classList.contains('bom') ? "#c8f7c5"
+    : td.classList.contains('anormal') ? "#fff3b0"
+    : "#c5d9f7";
+  verificarSalvar();
+}
+
+// VERIFICA SE PODE ATIVAR O BOTÃO SALVAR
+function verificarSalvar(){
+  const tbody = document.querySelectorAll('#tabela tbody tr');
+  let habilitar = tbody.length > 0;
+  tbody.forEach(tr=>{
+    if(!Array.from(tr.children).some(td=>td.style.backgroundColor)) habilitar = false;
+  });
+  document.getElementById('salvar').disabled = !habilitar;
+}
+
+// VOLTAR
 function voltarSelecao(){
   document.getElementById('tela-checklist').classList.remove('ativa');
   document.getElementById('tela-selecao').classList.add('ativa');
 }
 
-// verificar seleção completa
-function verificarChecklist(){
-  const radios = document.querySelectorAll('#tabela tbody input[type="radio"]');
-  const itens = {};
-  radios.forEach(r=>{if(!itens[r.name]) itens[r.name]=false; if(r.checked) itens[r.name]=true;});
-  const todosSelecionados = Object.values(itens).every(v=>v===true);
-  document.getElementById('salvar').disabled = !todosSelecionados;
-}
-
-// colorir linhas
-document.querySelector('#tabela').addEventListener('change', e=>{
-  const tr = e.target.closest('tr');
-  tr.classList.remove('bom','anormal','na');
-  if(e.target.checked){
-    if(e.target.value==='bom') tr.classList.add('bom');
-    if(e.target.value==='anormal') tr.classList.add('anormal');
-    if(e.target.value==='na') tr.classList.add('na');
-  }
-  verificarChecklist();
-});
-
-// salvar checklist JSON
+// SALVAR (exemplo simples)
 function salvarChecklist(){
-  const checklist = {
-    motorista: document.getElementById('motorista').value,
-    veiculo: document.getElementById('veiculo').value,
-    tipo: document.getElementById('tipo').value,
-    km: document.getElementById('kmHorimetro').value,
-    observacoes: document.getElementById('obs').value,
-    itens: {}
-  };
-  document.querySelectorAll('#tabela tbody tr').forEach(tr=>{
-    const item = tr.cells[0].innerText;
-    const value = tr.querySelector('input[type="radio"]:checked')?.value || '';
-    checklist.itens[item]=value;
-  });
-  // salvar localStorage
-  localStorage.setItem(`checklist_${new Date().toISOString()}`, JSON.stringify(checklist));
-  alert('Checklist salvo com sucesso!');
+  alert("Checklist salvo com sucesso!");
 }
 
-// gerar PDF
+// GERAR PDF
 function gerarPDF(){
   const element = document.getElementById('pdf-content'); // captura toda área do PDF
 
-  // Destacar itens ANORMAIS em vermelho
+  // Destacar itens ANORMAIS em vermelho para PDF
   document.querySelectorAll('#tabela tbody tr').forEach(tr=>{
-    if(tr.classList.contains('anormal')){
+    if(tr.querySelector('.anormal').style.backgroundColor === "rgb(255, 243, 176)"){ // amarelo
       tr.classList.add('anormal-pdf');
     } else {
       tr.classList.remove('anormal-pdf');
@@ -307,7 +357,6 @@ function gerarPDF(){
   kmSpan.innerText = kmInput.value;
   kmInput.parentNode.replaceChild(kmSpan, kmInput);
 
-  // Gerar PDF
   const opt = {
     margin: 10,
     filename: `Checklist_${new Date().toISOString().slice(0,10)}.pdf`,
@@ -317,21 +366,17 @@ function gerarPDF(){
   };
 
   html2pdf().set(opt).from(element).save().then(()=>{
-    // Depois do PDF, voltar KM/Horímetro e Observações ao normal
     kmSpan.parentNode.replaceChild(kmInput, kmSpan);
     obsDiv.parentNode.replaceChild(obs, obsDiv);
   });
 }
 
-// registrar service worker
+// SERVICE WORKER
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js')
   .then(()=>console.log('Service Worker registrado'))
   .catch(err=>console.log('Erro SW',err));
 }
-
 </script>
 </body>
 </html>
-
-
