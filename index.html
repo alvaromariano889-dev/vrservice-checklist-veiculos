@@ -50,7 +50,6 @@ button:disabled {
 .tela {
   display: none;
 }
-
 .tela.ativa {
   display: block;
 }
@@ -61,7 +60,6 @@ button:disabled {
   flex-wrap: wrap;
   gap: 10px;
 }
-
 .grid > div {
   flex: 1 1 200px;
 }
@@ -72,13 +70,11 @@ button:disabled {
   border-collapse: collapse;
   margin-top: 15px;
 }
-
 .table th, .table td {
   border: 1px solid #000;
   padding: 8px;
   text-align: center;
 }
-
 .table th:first-child,
 .table td:first-child {
   text-align: left;
@@ -146,6 +142,7 @@ button:disabled {
   <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
   <p><strong>Veículo:</strong> <span id="resumoVeiculo"></span></p>
   <p><strong>Tipo:</strong> <span id="resumoTipo"></span></p>
+  <p><strong>KM ou Horímetro:</strong> <input type="number" id="kmHorimetro" min="0" style="width:200px;"></p>
 
   <table class="table" id="tabela">
     <thead>
@@ -154,7 +151,6 @@ button:disabled {
         <th>BOM</th>
         <th>ANORMAL</th>
         <th>N.A.</th>
-        <th>Valor</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -170,44 +166,40 @@ button:disabled {
 </div>
 
 <script>
-// modelos de checklist: itens comuns + marca se precisa de campo numérico
+// modelos sem KM/Horímetro dentro da tabela
 const modelos = {
   empilhadeira: [
-    { texto: "Pneus e Rodas (calibragem)", numero: false },
-    { texto: "Garfos (patins) e mastro", numero: false },
-    { texto: "Vazamentos", numero: false },
-    { texto: "Nível de óleo do motor", numero: false },
-    { texto: "Nível de óleo hidráulico", numero: false },
-    { texto: "Freios", numero: false },
-    { texto: "Buzina / sinalização", numero: false },
-    { texto: "Horímetro", numero: true }      // numérico
+    "Pneus e Rodas (calibragem)",
+    "Garfos (patins) e mastro",
+    "Vazamentos",
+    "Nível de óleo do motor",
+    "Nível de óleo hidráulico",
+    "Freios",
+    "Buzina / sinalização"
   ],
   carro: [
-    { texto: "Luzes", numero: false },
-    { texto: "Vazamentos", numero: false },
-    { texto: "Espelhos e vidros", numero: false },
-    { texto: "Freios", numero: false },
-    { texto: "Nível de fluidos", numero: false },
-    { texto: "Rodas / pneus", numero: false },
-    { texto: "KM", numero: true }             // numérico
+    "Luzes",
+    "Vazamentos",
+    "Espelhos e vidros",
+    "Freios",
+    "Nível de fluidos",
+    "Rodas / pneus"
   ],
   bau: [
-    { texto: "Luzes", numero: false },
-    { texto: "Vazamentos", numero: false },
-    { texto: "Freios", numero: false },
-    { texto: "Nível de fluidos", numero: false },
-    { texto: "Rodas / pneus", numero: false },
-    { texto: "Baú (portas e travas)", numero: false },
-    { texto: "KM", numero: true }             // numérico
+    "Luzes",
+    "Vazamentos",
+    "Freios",
+    "Nível de fluidos",
+    "Rodas / pneus",
+    "Baú (portas e travas)"
   ],
   f400: [
-    { texto: "Luzes", numero: false },
-    { texto: "Vazamentos", numero: false },
-    { texto: "Freios", numero: false },
-    { texto: "Nível de fluidos", numero: false },
-    { texto: "Rodas / pneus", numero: false },
-    { texto: "Carroceria / carga", numero: false },
-    { texto: "KM", numero: true }             // numérico
+    "Luzes",
+    "Vazamentos",
+    "Freios",
+    "Nível de fluidos",
+    "Rodas / pneus",
+    "Carroceria / carga"
   ]
 };
 
@@ -283,7 +275,6 @@ function irParaChecklist() {
     return;
   }
 
-  // resumo
   document.getElementById("resumoMotorista").innerText = m;
   document.getElementById("resumoVeiculo").innerText = v;
   document.getElementById("resumoTipo").innerText =
@@ -300,24 +291,24 @@ function voltarSelecao() {
   document.getElementById("tela-selecao").classList.add("ativa");
 }
 
-// monta checklist da tela 2
+// monta checklist
 function montarChecklist(tipo) {
   const tbody = document.querySelector("#tabela tbody");
   tbody.innerHTML = "";
   document.getElementById("obs").value = "";
+  document.getElementById("kmHorimetro").value = "";
   document.getElementById("salvar").disabled = true;
 
   const modelo = modelos[tipo];
   if (!modelo) return;
 
-  modelo.forEach((item, i) => {
+  modelo.forEach((texto, i) => {
     tbody.innerHTML += `
       <tr>
-        <td>${item.texto}</td>
+        <td>${texto}</td>
         <td><input type="radio" name="i${i}" onclick="marcar(this,'bom')"></td>
         <td><input type="radio" name="i${i}" onclick="marcar(this,'anormal')"></td>
         <td><input type="radio" name="i${i}" onclick="marcar(this,'na')"></td>
-        <td>${item.numero ? `<input type="number" min="0" id="num${i}" style="width:100%; padding:4px;">` : ""}</td>
       </tr>
     `;
   });
@@ -331,7 +322,7 @@ function marcar(radio, tipo) {
   validar();
 }
 
-// valida checklist
+// valida checklist (itens + observação se anormal)
 function validar() {
   const linhas = document.querySelectorAll("#tabela tbody tr");
   let todosMarcados = true;
@@ -355,12 +346,13 @@ function validar() {
 
 document.getElementById("obs").addEventListener("input", validar);
 
-// salva checklist localmente
+// salva checklist incluindo km/horímetro
 function salvarChecklist() {
   const motorista = document.getElementById("motorista").value.trim();
   const veiculo = document.getElementById("veiculo").value.trim();
   const tipo = document.getElementById("tipo").value;
   const obs = document.getElementById("obs").value.trim();
+  const kmHor = document.getElementById("kmHorimetro").value.trim();
 
   const linhas = document.querySelectorAll("#tabela tbody tr");
   const itens = [];
@@ -372,14 +364,10 @@ function salvarChecklist() {
     else if (l.classList.contains("anormal")) status = "ANORMAL";
     else if (l.classList.contains("na")) status = "NA";
 
-    const inputNum = l.querySelector("input[type=number]");
-    const valorNum = inputNum ? inputNum.value : "";
-
     itens.push({
       ordem: idx + 1,
       item: texto,
-      status,
-      valor: valorNum
+      status
     });
   });
 
@@ -392,6 +380,7 @@ function salvarChecklist() {
     motorista,
     veiculo,
     tipo,
+    km_horimetro: kmHor,
     itens,
     obs
   };
