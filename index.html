@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <head>
   <meta charset="UTF-8">
   <title>Checklist Veículos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+    @page {
+  size: A4;
+  margin: 10mm;
+}
+
+.section {
+  page-break-inside: avoid;
+}
+
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
@@ -94,6 +105,7 @@
 
   <!-- TELA 2 -->
 <div id="tela-checklist" class="card hidden">
+<div id="area-pdf">
 
   <div class="header">
     <img src="logo.png" alt="Logo da empresa">
@@ -151,6 +163,8 @@
     <div>Bom</div>
     <div>Anormal</div>
     <div>N.A.</div>
+    </div> <!-- fecha area-pdf -->
+
   </div>
 
   <!-- 1️⃣ MOTOR / ESTRUTURA -->
@@ -358,13 +372,26 @@
   }
 
   function salvarChecklist() {
-    alert('Checklist validado! Próxima etapa: PDF.');
+  const area = document.getElementById('area-pdf');
+
+  const opt = {
+    margin:       [10, 10, 10, 10],
+    filename:     'Checklist_' + new Date().toISOString().slice(0,10) + '.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(area).save();
+}
+
   }
 
   document.addEventListener('change', () => {
     document.getElementById('btnSalvar').disabled = !validarChecklist();
   });
 </script>
+
 
 
 
