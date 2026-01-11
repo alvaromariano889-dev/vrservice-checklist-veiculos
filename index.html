@@ -1,347 +1,212 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-
-    <meta charset="UTF-8">
+<head>
+  <meta charset="UTF-8">
   <title>Checklist Veículos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    @page {
-  size: A4;
-  margin: 10mm;
-}
 
-.section {
-  page-break-inside: avoid;
-}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    @page { size: A4; margin: 10mm; }
 
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
       margin: 0;
-      padding: 0;
     }
+
     .container {
       max-width: 420px;
       margin: auto;
       padding: 20px;
     }
+
     .card {
       background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    label {
-      font-weight: bold;
-      margin-top: 15px;
-      display: block;
-    }
-    input, select, button {
+
+    h2 { text-align: center; }
+
+    label { font-weight: bold; display: block; margin-top: 15px; }
+
+    input, select, textarea, button {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin-top: 5px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 16px;
+      font-size: 14px;
     }
+
     button {
       background: #007bff;
       color: #fff;
       border: none;
-      margin-top: 25px;
-      cursor: pointer;
+      margin-top: 20px;
     }
-    button:disabled {
-      background: #aaa;
-    }
-    .hidden {
-      display: none;
-    }
+
+    button:disabled { background: #aaa; }
+
+    .hidden { display: none; }
+
     .header {
       text-align: center;
       margin-bottom: 15px;
     }
-    .header img {
-      max-width: 150px;
-      margin-bottom: 10px;
+
+    .header img { max-width: 150px; }
+
+    .info { font-size: 13px; }
+
+    .section {
+      margin-top: 20px;
+      page-break-inside: avoid;
     }
-    .info {
-      font-size: 14px;
-      margin-bottom: 5px;
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr repeat(3, 60px);
+      gap: 5px;
+      align-items: center;
+      font-size: 13px;
+      border-bottom: 1px solid #eee;
+      padding: 5px 0;
+    }
+
+    .head {
+      display: grid;
+      grid-template-columns: 1fr repeat(3, 60px);
+      font-weight: bold;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
-<body>
 
+<body>
 <div class="container">
 
-  <!-- TELA 1 -->
-  <div id="tela-login" class="card">
-    <h2>Identificação</h2>
+<!-- 🔹 TELA 1 -->
+<div id="tela-login" class="card">
+  <h2>Identificação</h2>
 
-    <label>Condutor</label>
-    <input type="text" id="condutor">
+  <label>Condutor</label>
+  <input id="condutor">
 
-    <label>Veículo</label>
-    <input type="text" id="veiculo">
+  <label>Veículo</label>
+  <input id="veiculo">
 
-    <label>Período</label>
-    <select id="periodo">
-      <option value="">Selecione...</option>
-      <option>Manhã</option>
-      <option>Tarde</option>
-      <option>Noite</option>
-    </select>
+  <label>Período</label>
+  <select id="periodo">
+    <option value="">Selecione</option>
+    <option>Manhã</option>
+    <option>Tarde</option>
+    <option>Noite</option>
+  </select>
 
-    <button type="button" onclick="iniciarChecklist()">Iniciar Checklist</button>
+  <button onclick="iniciarChecklist()">Iniciar Checklist</button>
+</div>
 
-  </div>
-
-  <!-- TELA 2 -->
+<!-- 🔹 TELA 2 -->
 <div id="tela-checklist" class="card hidden">
 
   <div id="area-pdf">
 
     <div class="header">
-      <!-- logo + infos -->
+      <img src="logo.png">
+      <div class="info" id="info-data"></div>
+      <div class="info" id="info-condutor"></div>
+      <div class="info" id="info-veiculo"></div>
+      <div class="info" id="info-periodo"></div>
     </div>
 
     <h2>Checklist</h2>
 
-    <!-- TODAS AS SEÇÕES -->
-    <!-- MOTOR / PNEUS / GARFOS / ETC -->
+    <div class="head">
+      <div></div><div>Bom</div><div>Anormal</div><div>N.A.</div>
+    </div>
+
+    <!-- EXEMPLO DE SEÇÃO -->
+    <div class="section">
+      <h3>Motor / Estrutura</h3>
+
+      <div class="item">
+        <label>Sem vazamentos</label>
+        <input type="radio" name="m1">
+        <input type="radio" name="m1">
+        <input type="radio" name="m1">
+      </div>
+
+      <div class="item">
+        <label>Estrutura íntegra</label>
+        <input type="radio" name="m2">
+        <input type="radio" name="m2">
+        <input type="radio" name="m2">
+      </div>
+    </div>
 
     <label>Observações</label>
     <textarea id="observacoes"></textarea>
 
   </div> <!-- fecha area-pdf -->
 
-  <button id="btnSalvar" type="button" onclick="salvarChecklist()" disabled>
+  <button id="btnSalvar" onclick="salvarChecklist()" disabled>
     Salvar Checklist
   </button>
 
 </div> <!-- fecha tela-checklist -->
 
-
-  <!-- 1️⃣ MOTOR / ESTRUTURA -->
-  <div class="section">
-    <h3>1️⃣ Motor / Estrutura</h3>
-
-    <div class="item">
-      <label>Ausência de vazamentos (óleo, água, fluido hidráulico)</label>
-      <input type="radio" name="m1">
-      <input type="radio" name="m1">
-      <input type="radio" name="m1">
-    </div>
-
-    <div class="item">
-      <label>Estrutura sem trincas ou danos visíveis</label>
-      <input type="radio" name="m2">
-      <input type="radio" name="m2">
-      <input type="radio" name="m2">
-    </div>
-  </div>
-
-  <!-- 2️⃣ PNEUS / RODAS -->
-  <div class="section">
-    <h3>2️⃣ Pneus / Rodas</h3>
-
-    <div class="item">
-      <label>Pneus em bom estado</label>
-      <input type="radio" name="p1">
-      <input type="radio" name="p1">
-      <input type="radio" name="p1">
-    </div>
-
-    <div class="item">
-      <label>Calibragem adequada (se pneumáticos)</label>
-      <input type="radio" name="p2">
-      <input type="radio" name="p2">
-      <input type="radio" name="p2">
-    </div>
-
-    <div class="item">
-      <label>Rodas e porcas firmes</label>
-      <input type="radio" name="p3">
-      <input type="radio" name="p3">
-      <input type="radio" name="p3">
-    </div>
-  </div>
-
-  <!-- 3️⃣ GARFOS E MASTRO -->
-  <div class="section">
-    <h3>3️⃣ Garfos e Mastro</h3>
-
-    <div class="item">
-      <label>Garfos sem trincas, empenos ou desgaste excessivo</label>
-      <input type="radio" name="g1">
-      <input type="radio" name="g1">
-      <input type="radio" name="g1">
-    </div>
-
-    <div class="item">
-      <label>Travas dos garfos funcionando</label>
-      <input type="radio" name="g2">
-      <input type="radio" name="g2">
-      <input type="radio" name="g2">
-    </div>
-
-    <div class="item">
-      <label>Correntes do mastro em bom estado</label>
-      <input type="radio" name="g3">
-      <input type="radio" name="g3">
-      <input type="radio" name="g3">
-    </div>
-
-    <div class="item">
-      <label>Elevação e inclinação funcionando corretamente</label>
-      <input type="radio" name="g4">
-      <input type="radio" name="g4">
-      <input type="radio" name="g4">
-    </div>
-  </div>
-
-  <!-- 4️⃣ SISTEMA HIDRÁULICO -->
-  <div class="section">
-    <h3>4️⃣ Sistema Hidráulico</h3>
-
-    <div class="item">
-      <label>Mangueiras sem rachaduras ou vazamentos</label>
-      <input type="radio" name="h1">
-      <input type="radio" name="h1">
-      <input type="radio" name="h1">
-    </div>
-
-    <div class="item">
-      <label>Nível do óleo hidráulico adequado</label>
-      <input type="radio" name="h2">
-      <input type="radio" name="h2">
-      <input type="radio" name="h2">
-    </div>
-  </div>
-
-  <!-- 5️⃣ FREIOS E DIREÇÃO -->
-  <div class="section">
-    <h3>5️⃣ Freios e Direção</h3>
-
-    <div class="item">
-      <label>Freio de serviço funcionando</label>
-      <input type="radio" name="f1">
-      <input type="radio" name="f1">
-      <input type="radio" name="f1">
-    </div>
-
-    <div class="item">
-      <label>Freio de estacionamento funcionando</label>
-      <input type="radio" name="f2">
-      <input type="radio" name="f2">
-      <input type="radio" name="f2">
-    </div>
-
-    <div class="item">
-      <label>Direção sem folgas ou travamentos</label>
-      <input type="radio" name="f3">
-      <input type="radio" name="f3">
-      <input type="radio" name="f3">
-    </div>
-  </div>
-
-  <!-- 6️⃣ SISTEMA ELÉTRICO -->
-  <div class="section">
-    <h3>6️⃣ Sistema Elétrico / Painel</h3>
-
-    <div class="item">
-      <label>Buzina funcionando</label>
-      <input type="radio" name="e1">
-      <input type="radio" name="e1">
-      <input type="radio" name="e1">
-    </div>
-
-    <div class="item">
-      <label>Luzes e sinalizadores operantes</label>
-      <input type="radio" name="e2">
-      <input type="radio" name="e2">
-      <input type="radio" name="e2">
-    </div>
-
-    <div class="item">
-      <label>Painel de instrumentos funcionando</label>
-      <input type="radio" name="e3">
-      <input type="radio" name="e3">
-      <input type="radio" name="e3">
-    </div>
-
-    <div class="item">
-      <label>Alarme de ré funcionando</label>
-      <input type="radio" name="e4">
-      <input type="radio" name="e4">
-      <input type="radio" name="e4">
-    </div>
-  </div>
-
 </div>
 
 <script>
-  function iniciarChecklist() {
-    const condutor = document.getElementById('condutor').value.trim();
-    const veiculo = document.getElementById('veiculo').value.trim();
-    const periodo = document.getElementById('periodo').value;
+function iniciarChecklist() {
+  const c = condutor.value.trim();
+  const v = veiculo.value.trim();
+  const p = periodo.value;
 
-    if (!condutor || !veiculo || !periodo) {
-      alert('Preencha todos os campos.');
-      return;
-    }
+  if (!c || !v || !p) return alert("Preencha tudo");
 
-    document.getElementById('tela-login').classList.add('hidden');
-    document.getElementById('tela-checklist').classList.remove('hidden');
+  tela-login.classList.add("hidden");
+  tela-checklist.classList.remove("hidden");
 
-    const agora = new Date();
-    document.getElementById('info-data').innerText = 'Data/Hora: ' + agora.toLocaleString();
-    document.getElementById('info-condutor').innerText = 'Condutor: ' + condutor;
-    document.getElementById('info-veiculo').innerText = 'Veículo: ' + veiculo;
-    document.getElementById('info-periodo').innerText = 'Período: ' + periodo;
-  }
+  const d = new Date().toLocaleString();
+  info-data.innerText = "Data/Hora: " + d;
+  info-condutor.innerText = "Condutor: " + c;
+  info-veiculo.innerText = "Veículo: " + v;
+  info-periodo.innerText = "Período: " + p;
+}
 
-  function validarChecklist() {
-    const grupos = {};
-    document.querySelectorAll('input[type="radio"]').forEach(r => {
-      grupos[r.name] = grupos[r.name] || false;
-      if (r.checked) grupos[r.name] = true;
-    });
-
-    const tudoMarcado = Object.values(grupos).every(v => v);
-    const anormal = [...document.querySelectorAll('input[type="radio"]:checked')]
-      .some(r => r.parentElement.children[2] === r);
-
-    const obs = document.getElementById('observacoes').value.trim();
-
-    if (!tudoMarcado) return false;
-    if (anormal && !obs) return false;
-    return true;
-  }
-
-  function salvarChecklist() {
-    const area = document.getElementById('area-pdf');
-
-    html2pdf().set({
-      margin: 10,
-      filename: 'Checklist_' + new Date().toISOString().slice(0,10) + '.pdf',
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(area).save();
-  }
-
-  document.addEventListener('change', () => {
-    document.getElementById('btnSalvar').disabled = !validarChecklist();
+function validarChecklist() {
+  const grupos = {};
+  document.querySelectorAll("input[type=radio]").forEach(r => {
+    grupos[r.name] = grupos[r.name] || false;
+    if (r.checked) grupos[r.name] = true;
   });
+
+  return Object.values(grupos).every(v => v);
+}
+
+document.addEventListener("change", () => {
+  btnSalvar.disabled = !validarChecklist();
+});
+
+function salvarChecklist() {
+  html2pdf().from(area-pdf).set({
+    filename: "Checklist.pdf",
+    jsPDF: { unit: "mm", format: "a4" }
+  }).save();
+}
 </script>
+
+</body>
+</html>
+
+
 
 
 
