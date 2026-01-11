@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <head>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-<head>
-  <meta charset="UTF-8">
+
+    <meta charset="UTF-8">
   <title>Checklist Veículos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -105,67 +106,29 @@
 
   <!-- TELA 2 -->
 <div id="tela-checklist" class="card hidden">
-<div id="area-pdf">
 
-  <div class="header">
-    <img src="logo.png" alt="Logo da empresa">
-    <div class="info" id="info-data"></div>
-    <div class="info" id="info-condutor"></div>
-    <div class="info" id="info-veiculo"></div>
-    <div class="info" id="info-periodo"></div>
-    <label style="margin-top:20px;">Observações (obrigatório se houver item Anormal)</label>
-<textarea id="observacoes" rows="4" style="width:100%; padding:10px;"></textarea>
+  <div id="area-pdf">
 
-<button id="btnSalvar" type="button" onclick="salvarChecklist()" disabled>
-  Salvar Checklist
-</button>
+    <div class="header">
+      <!-- logo + infos -->
+    </div>
 
-  </div>
+    <h2>Checklist</h2>
 
-  <h2>Checklist</h2>
+    <!-- TODAS AS SEÇÕES -->
+    <!-- MOTOR / PNEUS / GARFOS / ETC -->
 
-  <style>
-    .section {
-      margin-top: 20px;
-      border-top: 2px solid #eee;
-      padding-top: 10px;
-    }
-    .section h3 {
-      margin-bottom: 10px;
-    }
-    .item {
-      display: grid;
-      grid-template-columns: 1fr repeat(3, 70px);
-      align-items: center;
-      gap: 5px;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-    }
-    .item label {
-      font-weight: normal;
-    }
-    .item input {
-      transform: scale(1.2);
-    }
-    .head {
-      display: grid;
-      grid-template-columns: 1fr repeat(3, 70px);
-      font-weight: bold;
-      font-size: 13px;
-      text-align: center;
-      margin-bottom: 5px;
-    }
-  </style>
+    <label>Observações</label>
+    <textarea id="observacoes"></textarea>
 
-  <div class="head">
-    <div></div>
-    <div>Bom</div>
-    <div>Anormal</div>
-    <div>N.A.</div>
-    </div> <!-- fecha area-pdf -->
+  </div> <!-- fecha area-pdf -->
 
-  </div>
+  <button id="btnSalvar" type="button" onclick="salvarChecklist()" disabled>
+    Salvar Checklist
+  </button>
+
+</div> <!-- fecha tela-checklist -->
+
 
   <!-- 1️⃣ MOTOR / ESTRUTURA -->
   <div class="section">
@@ -340,14 +303,10 @@
     document.getElementById('tela-checklist').classList.remove('hidden');
 
     const agora = new Date();
-    document.getElementById('info-data').innerText =
-      'Data/Hora: ' + agora.toLocaleString();
-    document.getElementById('info-condutor').innerText =
-      'Condutor: ' + condutor;
-    document.getElementById('info-veiculo').innerText =
-      'Veículo: ' + veiculo;
-    document.getElementById('info-periodo').innerText =
-      'Período: ' + periodo;
+    document.getElementById('info-data').innerText = 'Data/Hora: ' + agora.toLocaleString();
+    document.getElementById('info-condutor').innerText = 'Condutor: ' + condutor;
+    document.getElementById('info-veiculo').innerText = 'Veículo: ' + veiculo;
+    document.getElementById('info-periodo').innerText = 'Período: ' + periodo;
   }
 
   function validarChecklist() {
@@ -358,39 +317,33 @@
     });
 
     const tudoMarcado = Object.values(grupos).every(v => v);
-    const anormal = document.querySelectorAll('input[type="radio"]:checked')
-      .length > 0 &&
-      [...document.querySelectorAll('input[type="radio"]:checked')]
+    const anormal = [...document.querySelectorAll('input[type="radio"]:checked')]
       .some(r => r.parentElement.children[2] === r);
 
     const obs = document.getElementById('observacoes').value.trim();
 
     if (!tudoMarcado) return false;
     if (anormal && !obs) return false;
-
     return true;
   }
 
   function salvarChecklist() {
-  const area = document.getElementById('area-pdf');
+    const area = document.getElementById('area-pdf');
 
-  const opt = {
-    margin:       [10, 10, 10, 10],
-    filename:     'Checklist_' + new Date().toISOString().slice(0,10) + '.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  html2pdf().set(opt).from(area).save();
-}
-
+    html2pdf().set({
+      margin: 10,
+      filename: 'Checklist_' + new Date().toISOString().slice(0,10) + '.pdf',
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(area).save();
   }
 
   document.addEventListener('change', () => {
     document.getElementById('btnSalvar').disabled = !validarChecklist();
   });
 </script>
+
+
 
 
 
