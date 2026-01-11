@@ -2,8 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Checklist Diário</title>
+<title>Checklist Diário de Veículos</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- PDF A4 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 body {
@@ -26,19 +29,31 @@ body {
 
 label {
   font-weight: bold;
+  display: block;
+  margin-top: 8px;
 }
 
 input, select, textarea {
   width: 100%;
-  padding: 6px;
+  padding: 8px;
   box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 button {
   margin-top: 15px;
-  padding: 10px 30px;
+  padding: 12px 24px;
   font-size: 16px;
   cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background: #0a7cff;
+  color: white;
+}
+
+button:hover:not(:disabled) {
+  background: #0962d8;
 }
 
 button:disabled {
@@ -54,38 +69,69 @@ button:disabled {
   display: block;
 }
 
-/* layout seleção */
+/* seleção */
 .grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 15px;
+  margin-top: 20px;
 }
 .grid > div {
-  flex: 1 1 200px;
+  flex: 1 1 280px;
+  min-width: 250px;
 }
 
-/* tabela checklist */
+/* resumo */
+.resumo {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+}
+.resumo p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+/* tabela */
 .table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  margin: 20px 0;
 }
 .table th, .table td {
-  border: 1px solid #000;
-  padding: 8px;
+  border: 1px solid #333;
+  padding: 10px 8px;
   text-align: center;
+  font-size: 14px;
 }
-.table th:first-child,
-.table td:first-child {
+.table th {
+  background: #e9ecef;
+  font-weight: bold;
+}
+.table th:first-child, .table td:first-child {
   text-align: left;
+  width: 40%;
 }
 
-.bom { background: #c8f7c5; }
-.anormal { background: #f7c5c5; }
-.na { background: #c5d9f7; }
+.bom { background: #c8f7c5 !important; }
+.anormal { background: #f7c5c5 !important; }
+.na { background: #c5d9f7 !important; }
 
 .obs-box {
-  margin-top: 15px;
+  margin: 20px 0;
+}
+
+#kmHorimetro {
+  width: 200px !important;
+  display: inline-block;
+}
+
+/* PDF otimizado */
+@media print {
+  body { background: white; }
+  .container { max-width: none; padding: 10mm; }
+  .tela:not(.ativa), button { display: none !important; }
 }
 </style>
 </head>
@@ -100,24 +146,20 @@ button:disabled {
 
 <!-- TELA 1: SELEÇÃO -->
 <div class="container tela ativa" id="tela-selecao">
-  <h3>Dados iniciais</h3>
+  <h3>📋 Dados iniciais</h3>
 
   <div class="grid">
     <div>
       <label>Motorista / Operador</label>
-      <input type="text" id="motorista">
-      <button type="button" onclick="salvarMotorista()">Salvar motorista</button>
-      <select id="listaMotoristas" onchange="selecionarMotorista()">
-        <option value="">Motoristas salvos</option>
+      <select id="motorista">
+        <option value="">Digite ou selecione</option>
       </select>
     </div>
 
     <div>
       <label>Veículo / Placa ou Patrimônio</label>
-      <input type="text" id="veiculo">
-      <button type="button" onclick="salvarVeiculo()">Salvar veículo</button>
-      <select id="listaVeiculos" onchange="selecionarVeiculo()">
-        <option value="">Veículos salvos</option>
+      <select id="veiculo">
+        <option value="">Digite ou selecione</option>
       </select>
     </div>
 
@@ -133,266 +175,4 @@ button:disabled {
     </div>
   </div>
 
-  <button type="button" onclick="irParaChecklist()">Continuar para checklist</button>
-</div>
-
-<!-- TELA 2: CHECKLIST -->
-<div class="container tela" id="tela-checklist">
-  <h3>Checklist do veículo</h3>
-  <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
-  <p><strong>Veículo:</strong> <span id="resumoVeiculo"></span></p>
-  <p><strong>Tipo:</strong> <span id="resumoTipo"></span></p>
-  <p><strong>KM ou Horímetro:</strong> <input type="number" id="kmHorimetro" min="0" style="width:200px;"></p>
-
-  <table class="table" id="tabela">
-    <thead>
-      <tr>
-        <th>ITEM</th>
-        <th>BOM</th>
-        <th>ANORMAL</th>
-        <th>N.A.</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <div class="obs-box">
-    <label>Observações (obrigatório se houver item ANORMAL)</label>
-    <textarea id="obs" rows="3"></textarea>
-  </div>
-
-  <button type="button" onclick="voltarSelecao()">Voltar</button>
-  <button id="salvar" type="button" onclick="salvarChecklist()" disabled>Salvar Checklist</button>
-</div>
-
-<script>
-// modelos sem KM/Horímetro dentro da tabela
-const modelos = {
-  empilhadeira: [
-    "Pneus e Rodas (calibragem)",
-    "Garfos (patins) e mastro",
-    "Vazamentos",
-    "Nível de óleo do motor",
-    "Nível de óleo hidráulico",
-    "Freios",
-    "Buzina / sinalização"
-  ],
-  carro: [
-    "Luzes",
-    "Vazamentos",
-    "Espelhos e vidros",
-    "Freios",
-    "Nível de fluidos",
-    "Rodas / pneus"
-  ],
-  bau: [
-    "Luzes",
-    "Vazamentos",
-    "Freios",
-    "Nível de fluidos",
-    "Rodas / pneus",
-    "Baú (portas e travas)"
-  ],
-  f400: [
-    "Luzes",
-    "Vazamentos",
-    "Freios",
-    "Nível de fluidos",
-    "Rodas / pneus",
-    "Carroceria / carga"
-  ]
-};
-
-// relógio
-function atualizarDataHora() {
-  const d = new Date();
-  document.getElementById("datetime").innerText =
-    d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR");
-}
-setInterval(atualizarDataHora, 1000);
-atualizarDataHora();
-
-// motoristas/veículos salvos
-const CHAVE_MOTORISTAS = "motoristas_salvos";
-const CHAVE_VEICULOS = "veiculos_salvos";
-
-function carregarListas() {
-  const listaM = JSON.parse(localStorage.getItem(CHAVE_MOTORISTAS) || "[]");
-  const listaV = JSON.parse(localStorage.getItem(CHAVE_VEICULOS) || "[]");
-
-  const selM = document.getElementById("listaMotoristas");
-  const selV = document.getElementById("listaVeiculos");
-
-  selM.innerHTML = "<option value=''>Motoristas salvos</option>";
-  listaM.forEach(n => selM.innerHTML += `<option value="${n}">${n}</option>`);
-
-  selV.innerHTML = "<option value=''>Veículos salvos</option>";
-  listaV.forEach(v => selV.innerHTML += `<option value="${v}">${v}</option>`);
-}
-
-function salvarMotorista() {
-  const nome = document.getElementById("motorista").value.trim();
-  if (!nome) return;
-  let lista = JSON.parse(localStorage.getItem(CHAVE_MOTORISTAS) || "[]");
-  if (!lista.includes(nome)) {
-    lista.push(nome);
-    localStorage.setItem(CHAVE_MOTORISTAS, JSON.stringify(lista));
-    carregarListas();
-  }
-}
-
-function salvarVeiculo() {
-  const v = document.getElementById("veiculo").value.trim();
-  if (!v) return;
-  let lista = JSON.parse(localStorage.getItem(CHAVE_VEICULOS) || "[]");
-  if (!lista.includes(v)) {
-    lista.push(v);
-    localStorage.setItem(CHAVE_VEICULOS, JSON.stringify(lista));
-    carregarListas();
-  }
-}
-
-function selecionarMotorista() {
-  const valor = document.getElementById("listaMotoristas").value;
-  if (valor) document.getElementById("motorista").value = valor;
-}
-
-function selecionarVeiculo() {
-  const valor = document.getElementById("listaVeiculos").value;
-  if (valor) document.getElementById("veiculo").value = valor;
-}
-
-carregarListas();
-
-// navegação telas
-function irParaChecklist() {
-  const m = document.getElementById("motorista").value.trim();
-  const v = document.getElementById("veiculo").value.trim();
-  const t = document.getElementById("tipo").value;
-
-  if (!m || !v || !t) {
-    alert("Preencha Motorista, Veículo e Tipo de veículo.");
-    return;
-  }
-
-  document.getElementById("resumoMotorista").innerText = m;
-  document.getElementById("resumoVeiculo").innerText = v;
-  document.getElementById("resumoTipo").innerText =
-    document.getElementById("tipo").options[document.getElementById("tipo").selectedIndex].text;
-
-  montarChecklist(t);
-
-  document.getElementById("tela-selecao").classList.remove("ativa");
-  document.getElementById("tela-checklist").classList.add("ativa");
-}
-
-function voltarSelecao() {
-  document.getElementById("tela-checklist").classList.remove("ativa");
-  document.getElementById("tela-selecao").classList.add("ativa");
-}
-
-// monta checklist
-function montarChecklist(tipo) {
-  const tbody = document.querySelector("#tabela tbody");
-  tbody.innerHTML = "";
-  document.getElementById("obs").value = "";
-  document.getElementById("kmHorimetro").value = "";
-  document.getElementById("salvar").disabled = true;
-
-  const modelo = modelos[tipo];
-  if (!modelo) return;
-
-  modelo.forEach((texto, i) => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${texto}</td>
-        <td><input type="radio" name="i${i}" onclick="marcar(this,'bom')"></td>
-        <td><input type="radio" name="i${i}" onclick="marcar(this,'anormal')"></td>
-        <td><input type="radio" name="i${i}" onclick="marcar(this,'na')"></td>
-      </tr>
-    `;
-  });
-}
-
-// marca linha e revalida
-function marcar(radio, tipo) {
-  const linha = radio.closest("tr");
-  linha.classList.remove("bom", "anormal", "na");
-  linha.classList.add(tipo);
-  validar();
-}
-
-// valida checklist (itens + observação se anormal)
-function validar() {
-  const linhas = document.querySelectorAll("#tabela tbody tr");
-  let todosMarcados = true;
-  let existeAnormal = false;
-
-  linhas.forEach(l => {
-    const marcado = l.querySelector("input[type=radio]:checked");
-    if (!marcado) {
-      todosMarcados = false;
-    } else if (l.classList.contains("anormal")) {
-      existeAnormal = true;
-    }
-  });
-
-  const obs = document.getElementById("obs").value.trim();
-  let obsOk = true;
-  if (existeAnormal && obs === "") obsOk = false;
-
-  document.getElementById("salvar").disabled = !(todosMarcados && obsOk);
-}
-
-document.getElementById("obs").addEventListener("input", validar);
-
-// salva checklist incluindo km/horímetro
-function salvarChecklist() {
-  const motorista = document.getElementById("motorista").value.trim();
-  const veiculo = document.getElementById("veiculo").value.trim();
-  const tipo = document.getElementById("tipo").value;
-  const obs = document.getElementById("obs").value.trim();
-  const kmHor = document.getElementById("kmHorimetro").value.trim();
-
-  const linhas = document.querySelectorAll("#tabela tbody tr");
-  const itens = [];
-
-  linhas.forEach((l, idx) => {
-    const texto = l.cells[0].innerText;
-    let status = "";
-    if (l.classList.contains("bom")) status = "BOM";
-    else if (l.classList.contains("anormal")) status = "ANORMAL";
-    else if (l.classList.contains("na")) status = "NA";
-
-    itens.push({
-      ordem: idx + 1,
-      item: texto,
-      status
-    });
-  });
-
-  const agora = new Date();
-  const registro = {
-    id: Date.now(),
-    dataISO: agora.toISOString(),
-    dataBR: agora.toLocaleDateString("pt-BR"),
-    horaBR: agora.toLocaleTimeString("pt-BR"),
-    motorista,
-    veiculo,
-    tipo,
-    km_horimetro: kmHor,
-    itens,
-    obs
-  };
-
-  const chave = "checklists_diarios";
-  const lista = JSON.parse(localStorage.getItem(chave) || "[]");
-  lista.push(registro);
-  localStorage.setItem(chave, JSON.stringify(lista));
-
-  alert("Checklist salvo com sucesso (neste dispositivo).");
-}
-</script>
-
-</body>
-</html>
+  <button onc
