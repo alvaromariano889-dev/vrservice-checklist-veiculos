@@ -1,290 +1,73 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Checklist Veículos - VR Service</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Checklist Diário de Veículos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="manifest" href="manifest.json">
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-}
-.container {
-  max-width: 900px;
-  margin:auto;
-  padding:20px;
-}
-.card {
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-}
-.hidden { display:none; }
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
 
-input, select, textarea, button {
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  font-size:14px;
-}
-
-button {
-  background:#007bff;
-  color:#fff;
-  border:none;
-  cursor:pointer;
-}
-button:disabled {
-  background:#aaa;
-  cursor:not-allowed;
-}
-
-.header {
-  text-align:center;
-  border-bottom:2px solid #ccc;
-  padding-bottom:10px;
-  margin-bottom:20px;
-}
-.header img {
-  max-width:150px;
-}
-
-.company {
-  font-size:13px;
-  margin-top:5px;
-}
-
-.section {
-  margin-top:20px;
-}
-.section h3 {
-  background:#eee;
-  padding:8px;
-  font-size:15px;
-}
-
-.table {
-  width:100%;
-  border-collapse:collapse;
-}
-.table th, .table td {
-  border:1px solid #ccc;
-  padding:6px;
-  font-size:13px;
-}
-.table th {
-  background:#f0f0f0;
-}
-
-.radio-group {
-  display:flex;
-  justify-content:center;
-  gap:15px;
-}
-.radio-group label {
-  font-weight:bold;
-}
-.bom { color:#007bff; }
-.na { color:green; }
-.anormal { color:red; }
-
-.assinatura {
-  margin-top:40px;
-}
-.assinatura div {
-  border-top:1px solid #000;
-  width:300px;
-  margin-top:40px;
-}
-</style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+    }
+    button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
-<div class="container">
 
-<!-- TELA 1 -->
-<div id="tela-login" class="card">
-<h2>Identificação</h2>
-<input id="condutor" placeholder="Condutor">
-<input id="veiculo" placeholder="Veículo">
+<h2>Checklist Diário de Segurança do Veículo</h2>
 
-<select id="periodo">
-<option value="">Selecione o período</option>
-<option>Manhã</option>
-<option>Tarde</option>
-<option>Noite</option>
-</select>
+<label>Nome do Motorista</label>
+<input type="text" id="motorista">
+
+<label>Veículo (Placa / Patrimônio)</label>
+<input type="text" id="veiculo">
 
 <button onclick="iniciarChecklist()">Iniciar Checklist</button>
-</div>
 
-<!-- TELA 2 -->
-<div id="tela-checklist" class="card hidden">
+<div id="checklist" class="hidden">
+  <h3>Itens Básicos</h3>
 
-<div id="area-pdf">
+  <label><input type="checkbox"> Freios funcionando corretamente</label><br>
+  <label><input type="checkbox"> Luzes funcionando</label><br>
+  <label><input type="checkbox"> Pneus em boas condições</label><br>
+  <label><input type="checkbox"> Sem vazamentos visíveis</label><br>
 
-<div class="header">
-<img src="Logo.png">
-<div class="company">
-<strong>VR Service Ltda</strong><br>
-CNPJ: 31.590.236/0001-59<br>
-Av. Beira Rio Sul, 1169 – Cuiabá/MT
-</div>
-<p id="info-data"></p>
-<p id="info-condutor"></p>
-<p id="info-veiculo"></p>
-<p id="info-periodo"></p>
-<p><strong>Checklist nº <span id="num-check"></span></strong></p>
-</div>
-
-<!-- TABELA PADRÃO -->
-<script>
-function linhaItem(nome, grupo){
-  return `
-  <tr>
-    <td>${nome}</td>
-    <td class="radio-group">
-      <label class="bom"><input type="radio" name="${grupo}" value="Bom"> Bom</label>
-    </td>
-    <td class="radio-group">
-      <label class="anormal"><input type="radio" name="${grupo}" value="Anormal"> Anormal</label>
-    </td>
-    <td class="radio-group">
-      <label class="na"><input type="radio" name="${grupo}" value="NA"> N.A</label>
-    </td>
-  </tr>`;
-}
-</script>
-
-<!-- SEÇÕES -->
-<div class="section">
-<h3>Motor / Estrutura</h3>
-<table class="table">
-<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
-<script>
-document.write(
-linhaItem("Ausência de vazamentos", "m1") +
-linhaItem("Estrutura sem trincas", "m2")
-);
-</script>
-</table>
-</div>
-
-<div class="section">
-<h3>Pneus / Rodas</h3>
-<table class="table">
-<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
-<script>
-document.write(
-linhaItem("Pneus em bom estado", "p1") +
-linhaItem("Calibragem adequada", "p2") +
-linhaItem("Rodas e porcas firmes", "p3")
-);
-</script>
-</table>
-</div>
-
-<div class="section">
-<h3>Garfos e Mastro</h3>
-<table class="table">
-<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
-<script>
-document.write(
-linhaItem("Garfos sem trincas", "g1") +
-linhaItem("Travas funcionando", "g2") +
-linhaItem("Correntes em bom estado", "g3") +
-linhaItem("Elevação funcionando", "g4")
-);
-</script>
-</table>
-</div>
-
-<div class="section">
-<h3>Freios e Direção</h3>
-<table class="table">
-<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
-<script>
-document.write(
-linhaItem("Freio de serviço", "f1") +
-linhaItem("Freio estacionamento", "f2") +
-linhaItem("Direção sem folga", "f3")
-);
-</script>
-</table>
-</div>
-
-<div class="section">
-<h3>Sistema Elétrico</h3>
-<table class="table">
-<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
-<script>
-document.write(
-linhaItem("Buzina", "e1") +
-linhaItem("Luzes", "e2") +
-linhaItem("Painel", "e3") +
-linhaItem("Alarme de ré", "e4")
-);
-</script>
-</table>
-</div>
-
-<label>Observações (obrigatório se houver Anormal)</label>
-<textarea id="observacoes"></textarea>
-
-<div class="assinatura">
-<div>Assinatura do Condutor</div>
-</div>
-
-</div>
-
-<button id="btnSalvar" disabled onclick="salvarChecklist()">Salvar PDF</button>
-</div>
+  <button onclick="salvarChecklist()">Salvar Checklist</button>
 </div>
 
 <script>
-let contador = Math.floor(Math.random()*90000)+10000;
-document.getElementById("num-check").innerText = contador;
+  function iniciarChecklist() {
+    const motorista = document.getElementById("motorista").value;
+    const veiculo = document.getElementById("veiculo").value;
 
-function iniciarChecklist(){
-const c = condutor.value.trim();
-const v = veiculo.value.trim();
-const p = periodo.value;
-if(!c || !v || !p){ alert("Preencha todos os campos"); return; }
+    if (motorista === "" || veiculo === "") {
+      alert("Preencha o nome do motorista e o veículo.");
+      return;
+    }
 
-tela-login.classList.add("hidden");
-tela-checklist.classList.remove("hidden");
+    document.getElementById("checklist").classList.remove("hidden");
+  }
 
-info-data.innerText = "Data/Hora: " + new Date().toLocaleString();
-info-condutor.innerText = "Condutor: " + c;
-info-veiculo.innerText = "Veículo: " + v;
-info-periodo.innerText = "Período: " + p;
-}
-
-document.addEventListener("change",()=>{
-const radios = document.querySelectorAll("input[type=radio]");
-const grupos = {};
-radios.forEach(r=>{
-  grupos[r.name]=grupos[r.name]||false;
-  if(r.checked) grupos[r.name]=true;
-});
-const tudo = Object.values(grupos).every(v=>v);
-const anormal = [...radios].some(r=>r.checked && r.value==="Anormal");
-const obs = observacoes.value.trim();
-btnSalvar.disabled = !(tudo && (!anormal || obs));
-});
-
-function salvarChecklist(){
-html2pdf().set({
-margin:10,
-filename:"Checklist_"+contador+".pdf",
-html2canvas:{scale:2},
-jsPDF:{format:"a4",orientation:"portrait"}
-}).from(area-pdf).save();
-}
+  function salvarChecklist() {
+    alert("Checklist salvo com sucesso.");
+  }
 </script>
 
 </body>
