@@ -277,7 +277,17 @@ function salvarChecklist(){
 
 // gerar PDF
 function gerarPDF(){
-  const element = document.querySelector('.tela-checklist.ativa');
+  const element = document.getElementById('tela-checklist'); // CORRIGIDO
+
+  // Destacar itens ANORMAIS em vermelho para PDF
+  document.querySelectorAll('#tabela tbody tr').forEach(tr=>{
+    if(tr.classList.contains('anormal')){
+      tr.classList.add('anormal-pdf');
+    } else {
+      tr.classList.remove('anormal-pdf');
+    }
+  });
+
   const opt = {
     margin: 10,
     filename: `Checklist_${new Date().toISOString().slice(0,10)}.pdf`,
@@ -285,6 +295,7 @@ function gerarPDF(){
     html2canvas:{scale:2},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
   };
+
   html2pdf().set(opt).from(element).save();
 }
 
@@ -298,3 +309,4 @@ if('serviceWorker' in navigator){
 </script>
 </body>
 </html>
+
