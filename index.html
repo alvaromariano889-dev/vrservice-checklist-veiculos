@@ -5,10 +5,6 @@
 <title>Checklist Diário</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- (Pronto para PDF: depois é só adicionar a lib html2pdf abaixo)
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
--->
-
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -24,23 +20,8 @@ body {
   border-radius: 6px;
 }
 
-/* Área que será usada para o PDF A4 */
-#pdf-area {
-  background: #fff;
-}
-
 .logo, h2, .datetime {
   text-align: center;
-}
-
-.info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.info div {
-  flex: 1 1 200px;
 }
 
 label {
@@ -53,6 +34,39 @@ input, select, textarea {
   box-sizing: border-box;
 }
 
+button {
+  margin-top: 15px;
+  padding: 10px 30px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* telas */
+.tela {
+  display: none;
+}
+
+.tela.ativa {
+  display: block;
+}
+
+/* layout seleção */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.grid > div {
+  flex: 1 1 200px;
+}
+
+/* tabela checklist */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -74,19 +88,6 @@ input, select, textarea {
 .anormal { background: #f7c5c5; }
 .na { background: #c5d9f7; }
 
-button {
-  margin-top: 15px;
-  padding: 10px 30px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-/* Observações */
 .obs-box {
   margin-top: 15px;
 }
@@ -95,24 +96,38 @@ button:disabled {
 
 <body>
 
-<div class="container" id="pdf-area">
-  <!-- Cabeçalho preparado para logo / CNPJ / endereço -->
+<div class="container">
   <div class="logo"><strong>LOGO DA EMPRESA</strong></div>
   <h2>Checklist Diário de Inspeção</h2>
   <div class="datetime" id="datetime"></div>
+</div>
 
-  <div class="info">
+<!-- TELA 1: SELEÇÃO -->
+<div class="container tela ativa" id="tela-selecao">
+  <h3>Dados iniciais</h3>
+
+  <div class="grid">
     <div>
       <label>Motorista / Operador</label>
       <input type="text" id="motorista">
+      <button type="button" onclick="salvarMotorista()">Salvar motorista</button>
+      <select id="listaMotoristas" onchange="selecionarMotorista()">
+        <option value="">Motoristas salvos</option>
+      </select>
     </div>
+
     <div>
-      <label>Veículo / Placa</label>
+      <label>Veículo / Placa ou Patrimônio</label>
       <input type="text" id="veiculo">
+      <button type="button" onclick="salvarVeiculo()">Salvar veículo</button>
+      <select id="listaVeiculos" onchange="selecionarVeiculo()">
+        <option value="">Veículos salvos</option>
+      </select>
     </div>
+
     <div>
       <label>Tipo de Veículo</label>
-      <select id="tipo" onchange="carregarChecklist()">
+      <select id="tipo">
         <option value="">Selecione</option>
         <option value="empilhadeira">Empilhadeira</option>
         <option value="carro">Carro</option>
@@ -122,6 +137,16 @@ button:disabled {
     </div>
   </div>
 
+  <button type="button" onclick="irParaChecklist()">Continuar para checklist</button>
+</div>
+
+<!-- TELA 2: CHECKLIST -->
+<div class="container tela" id="tela-checklist">
+  <h3>Checklist do veículo</h3>
+  <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
+  <p><strong>Veículo:</strong> <span id="resumoVeiculo"></span></p>
+  <p><strong>Tipo:</strong> <span id="resumoTipo"></span></p>
+
   <table class="table" id="tabela">
     <thead>
       <tr>
@@ -129,6 +154,7 @@ button:disabled {
         <th>BOM</th>
         <th>ANORMAL</th>
         <th>N.A.</th>
+        <th>Valor</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -138,76 +164,166 @@ button:disabled {
     <label>Observações (obrigatório se houver item ANORMAL)</label>
     <textarea id="obs" rows="3"></textarea>
   </div>
-</div>
 
-<!-- Botões (ficam fora da área do PDF para não “sujar” o relatório) -->
-<div class="container" style="margin-top:10px;">
-  <button id="salvar" onclick="salvarChecklist()" disabled>Salvar Checklist</button>
-  <button id="pdf" onclick="gerarPDF()">Gerar PDF</button>
+  <button type="button" onclick="voltarSelecao()">Voltar</button>
+  <button id="salvar" type="button" onclick="salvarChecklist()" disabled>Salvar Checklist</button>
 </div>
 
 <script>
+// modelos de checklist: itens comuns + marca se precisa de campo numérico
 const modelos = {
   empilhadeira: [
-    "Pneus e Rodas (calibragem)",
-    "Garfos (patins) e mastro",
-    "Vazamentos",
-    "Nível de óleo do motor",
-    "Nível de óleo hidráulico",
-    "Freios",
-    "Buzina / sinalização",
-    "Horímetro"
+    { texto: "Pneus e Rodas (calibragem)", numero: false },
+    { texto: "Garfos (patins) e mastro", numero: false },
+    { texto: "Vazamentos", numero: false },
+    { texto: "Nível de óleo do motor", numero: false },
+    { texto: "Nível de óleo hidráulico", numero: false },
+    { texto: "Freios", numero: false },
+    { texto: "Buzina / sinalização", numero: false },
+    { texto: "Horímetro", numero: true }      // numérico
   ],
   carro: [
-    "Luzes",
-    "Vazamentos",
-    "Espelhos e vidros",
-    "Freios",
-    "Nível de fluidos",
-    "Rodas / pneus",
-    "KM"
+    { texto: "Luzes", numero: false },
+    { texto: "Vazamentos", numero: false },
+    { texto: "Espelhos e vidros", numero: false },
+    { texto: "Freios", numero: false },
+    { texto: "Nível de fluidos", numero: false },
+    { texto: "Rodas / pneus", numero: false },
+    { texto: "KM", numero: true }             // numérico
   ],
   bau: [
-    "Luzes",
-    "Vazamentos",
-    "Freios",
-    "Nível de fluidos",
-    "Rodas / pneus",
-    "Baú (portas e travas)",
-    "KM"
+    { texto: "Luzes", numero: false },
+    { texto: "Vazamentos", numero: false },
+    { texto: "Freios", numero: false },
+    { texto: "Nível de fluidos", numero: false },
+    { texto: "Rodas / pneus", numero: false },
+    { texto: "Baú (portas e travas)", numero: false },
+    { texto: "KM", numero: true }             // numérico
   ],
   f400: [
-    "Luzes",
-    "Vazamentos",
-    "Freios",
-    "Nível de fluidos",
-    "Rodas / pneus",
-    "Carroceria / carga",
-    "KM"
+    { texto: "Luzes", numero: false },
+    { texto: "Vazamentos", numero: false },
+    { texto: "Freios", numero: false },
+    { texto: "Nível de fluidos", numero: false },
+    { texto: "Rodas / pneus", numero: false },
+    { texto: "Carroceria / carga", numero: false },
+    { texto: "KM", numero: true }             // numérico
   ]
 };
 
-function carregarChecklist() {
-  const tipo = document.getElementById("tipo").value;
+// relógio
+function atualizarDataHora() {
+  const d = new Date();
+  document.getElementById("datetime").innerText =
+    d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR");
+}
+setInterval(atualizarDataHora, 1000);
+atualizarDataHora();
+
+// motoristas/veículos salvos
+const CHAVE_MOTORISTAS = "motoristas_salvos";
+const CHAVE_VEICULOS = "veiculos_salvos";
+
+function carregarListas() {
+  const listaM = JSON.parse(localStorage.getItem(CHAVE_MOTORISTAS) || "[]");
+  const listaV = JSON.parse(localStorage.getItem(CHAVE_VEICULOS) || "[]");
+
+  const selM = document.getElementById("listaMotoristas");
+  const selV = document.getElementById("listaVeiculos");
+
+  selM.innerHTML = "<option value=''>Motoristas salvos</option>";
+  listaM.forEach(n => selM.innerHTML += `<option value="${n}">${n}</option>`);
+
+  selV.innerHTML = "<option value=''>Veículos salvos</option>";
+  listaV.forEach(v => selV.innerHTML += `<option value="${v}">${v}</option>`);
+}
+
+function salvarMotorista() {
+  const nome = document.getElementById("motorista").value.trim();
+  if (!nome) return;
+  let lista = JSON.parse(localStorage.getItem(CHAVE_MOTORISTAS) || "[]");
+  if (!lista.includes(nome)) {
+    lista.push(nome);
+    localStorage.setItem(CHAVE_MOTORISTAS, JSON.stringify(lista));
+    carregarListas();
+  }
+}
+
+function salvarVeiculo() {
+  const v = document.getElementById("veiculo").value.trim();
+  if (!v) return;
+  let lista = JSON.parse(localStorage.getItem(CHAVE_VEICULOS) || "[]");
+  if (!lista.includes(v)) {
+    lista.push(v);
+    localStorage.setItem(CHAVE_VEICULOS, JSON.stringify(lista));
+    carregarListas();
+  }
+}
+
+function selecionarMotorista() {
+  const valor = document.getElementById("listaMotoristas").value;
+  if (valor) document.getElementById("motorista").value = valor;
+}
+
+function selecionarVeiculo() {
+  const valor = document.getElementById("listaVeiculos").value;
+  if (valor) document.getElementById("veiculo").value = valor;
+}
+
+carregarListas();
+
+// navegação telas
+function irParaChecklist() {
+  const m = document.getElementById("motorista").value.trim();
+  const v = document.getElementById("veiculo").value.trim();
+  const t = document.getElementById("tipo").value;
+
+  if (!m || !v || !t) {
+    alert("Preencha Motorista, Veículo e Tipo de veículo.");
+    return;
+  }
+
+  // resumo
+  document.getElementById("resumoMotorista").innerText = m;
+  document.getElementById("resumoVeiculo").innerText = v;
+  document.getElementById("resumoTipo").innerText =
+    document.getElementById("tipo").options[document.getElementById("tipo").selectedIndex].text;
+
+  montarChecklist(t);
+
+  document.getElementById("tela-selecao").classList.remove("ativa");
+  document.getElementById("tela-checklist").classList.add("ativa");
+}
+
+function voltarSelecao() {
+  document.getElementById("tela-checklist").classList.remove("ativa");
+  document.getElementById("tela-selecao").classList.add("ativa");
+}
+
+// monta checklist da tela 2
+function montarChecklist(tipo) {
   const tbody = document.querySelector("#tabela tbody");
   tbody.innerHTML = "";
+  document.getElementById("obs").value = "";
   document.getElementById("salvar").disabled = true;
 
-  if (!modelos[tipo]) return;
+  const modelo = modelos[tipo];
+  if (!modelo) return;
 
-  modelos[tipo].forEach((item, i) => {
+  modelo.forEach((item, i) => {
     tbody.innerHTML += `
       <tr>
-        <td>${item}</td>
+        <td>${item.texto}</td>
         <td><input type="radio" name="i${i}" onclick="marcar(this,'bom')"></td>
         <td><input type="radio" name="i${i}" onclick="marcar(this,'anormal')"></td>
         <td><input type="radio" name="i${i}" onclick="marcar(this,'na')"></td>
+        <td>${item.numero ? `<input type="number" min="0" id="num${i}" style="width:100%; padding:4px;">` : ""}</td>
       </tr>
     `;
   });
 }
 
-/** Marca linha com classe de status e revalida */
+// marca linha e revalida
 function marcar(radio, tipo) {
   const linha = radio.closest("tr");
   linha.classList.remove("bom", "anormal", "na");
@@ -215,17 +331,14 @@ function marcar(radio, tipo) {
   validar();
 }
 
-/** Valida:
- * - todos os itens marcados
- * - se tiver ANORMAL, observação obrigatória
- */
+// valida checklist
 function validar() {
   const linhas = document.querySelectorAll("#tabela tbody tr");
   let todosMarcados = true;
   let existeAnormal = false;
 
   linhas.forEach(l => {
-    const marcado = l.querySelector("input:checked");
+    const marcado = l.querySelector("input[type=radio]:checked");
     if (!marcado) {
       todosMarcados = false;
     } else if (l.classList.contains("anormal")) {
@@ -235,45 +348,19 @@ function validar() {
 
   const obs = document.getElementById("obs").value.trim();
   let obsOk = true;
-
-  if (existeAnormal && obs === "") {
-    obsOk = false;
-  }
+  if (existeAnormal && obs === "") obsOk = false;
 
   document.getElementById("salvar").disabled = !(todosMarcados && obsOk);
 }
 
-/** Observação digitada também influencia na validação */
 document.getElementById("obs").addEventListener("input", validar);
 
-/** Atualiza data e hora */
-function atualizarDataHora() {
-  const d = new Date();
-  document.getElementById("datetime").innerText =
-    d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR");
-}
-setInterval(atualizarDataHora, 1000);
-atualizarDataHora();
-
-/** SALVAMENTO LOCAL (funciona offline)
- * Guarda:
- * - data/hora
- * - motorista
- * - veículo
- * - tipo
- * - itens (status)
- * - observações
- */
+// salva checklist localmente
 function salvarChecklist() {
   const motorista = document.getElementById("motorista").value.trim();
   const veiculo = document.getElementById("veiculo").value.trim();
   const tipo = document.getElementById("tipo").value;
   const obs = document.getElementById("obs").value.trim();
-
-  if (!motorista || !veiculo || !tipo) {
-    alert("Preencha Motorista, Veículo e Tipo antes de salvar.");
-    return;
-  }
 
   const linhas = document.querySelectorAll("#tabela tbody tr");
   const itens = [];
@@ -285,10 +372,14 @@ function salvarChecklist() {
     else if (l.classList.contains("anormal")) status = "ANORMAL";
     else if (l.classList.contains("na")) status = "NA";
 
+    const inputNum = l.querySelector("input[type=number]");
+    const valorNum = inputNum ? inputNum.value : "";
+
     itens.push({
       ordem: idx + 1,
       item: texto,
-      status
+      status,
+      valor: valorNum
     });
   });
 
@@ -305,34 +396,12 @@ function salvarChecklist() {
     obs
   };
 
-  // Recupera histórico existente
   const chave = "checklists_diarios";
   const lista = JSON.parse(localStorage.getItem(chave) || "[]");
   lista.push(registro);
   localStorage.setItem(chave, JSON.stringify(lista));
 
-  alert("Checklist salvo com sucesso (armazenado neste dispositivo).");
-}
-
-/** Preparação para PDF A4
- * Aqui só deixamos o gancho. Quando você quiser o PDF pronto:
- * - descomentar o script html2pdf no <head>
- * - completar a função abaixo com as opções A4.
- */
-function gerarPDF() {
-  alert("PDF ainda não está ativado. Próximo passo será ligar o html2pdf e formatar em A4.");
-  // Exemplo (quando ativar html2pdf):
-  /*
-  const element = document.getElementById("pdf-area");
-  const opt = {
-    margin:       10,
-    filename:     `Checklist_${new Date().toISOString().slice(0,10)}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().from(element).set(opt).save();
-  */
+  alert("Checklist salvo com sucesso (neste dispositivo).");
 }
 </script>
 
