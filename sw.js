@@ -3,7 +3,7 @@ const urlsToCache = [
   'index.html',
   'manifest.json',
   'sw.js',
-  'icon-192.png',
+  'Logo.png',
   'icon-512.png'
 ];
 
@@ -18,3 +18,4 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(response => response || fetch(e.request))
   );
 });
+
