@@ -1,247 +1,142 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Checklist Diário de Segurança do Veículo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e40af">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-<style>
-:root {
-    --azul: #1e40af;
-    --cinza: #f3f4f6;
-    --borda: #e5e7eb;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background: var(--cinza);
-    padding: 20px;
-}
-
-.container {
-    max-width: 600px;
-    background: #fff;
-    padding: 20px;
-    margin: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
-}
-
-h2 {
-    text-align: center;
-    color: var(--azul);
-    margin-bottom: 20px;
-}
-
-.section {
-    margin-bottom: 20px;
-}
-
-.section-title {
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #374151;
-}
-
-label {
-    font-weight: 600;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 6px;
-    border: 1px solid var(--borda);
-    font-size: 14px;
-}
-
-textarea {
-    resize: vertical;
-}
-
-.check-item {
-    background: #f9fafb;
-    border: 1px solid var(--borda);
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.check-item input {
-    transform: scale(1.3);
-}
-
-button {
-    width: 100%;
-    padding: 14px;
-    margin-top: 10px;
-    font-size: 15px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: var(--azul);
-    color: #fff;
-}
-
-.btn-secondary {
-    background: #e5e7eb;
-}
-
-.btn-primary:hover {
-    background: #1e3a8a;
-}
-
-small {
-    color: #6b7280;
-}
-
-@media print {
+  <meta charset="UTF-8">
+  <title>Checklist Veículos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
     body {
-        background: #fff;
-        padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
     }
     .container {
-        box-shadow: none;
+      max-width: 420px;
+      margin: auto;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
     }
     button {
-        display: none;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      margin-top: 25px;
+      cursor: pointer;
     }
-}
-</style>
+    button:disabled {
+      background: #aaa;
+    }
+    .hidden {
+      display: none;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .header img {
+      max-width: 150px;
+      margin-bottom: 10px;
+    }
+    .info {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="container" id="app">
+<div class="container">
 
-<h2>Checklist Diário de Segurança do Veículo</h2>
+  <!-- TELA 1 -->
+  <div id="tela-login" class="card">
+    <h2>Identificação</h2>
 
-<div class="section">
-    <div class="section-title">Motorista</div>
-    <input id="motorista" placeholder="Nome do motorista">
-</div>
+    <label>Condutor</label>
+    <input type="text" id="condutor">
 
-<div class="section">
-    <div class="section-title">Veículo (Placa / Patrimônio)</div>
-    <select id="veiculo"></select>
-    <small>Selecione o veículo que será utilizado hoje</small>
-    <button class="btn-secondary" onclick="abrirCadastro()">Cadastrar novo veículo</button>
-</div>
+    <label>Veículo</label>
+    <input type="text" id="veiculo">
 
-<div class="section">
-    <div class="section-title">Checklist</div>
-    <div id="checklist"></div>
-</div>
+    <label>Período</label>
+    <select id="periodo">
+      <option value="">Selecione...</option>
+      <option>Manhã</option>
+      <option>Tarde</option>
+      <option>Noite</option>
+    </select>
 
-<div class="section">
-    <div class="section-title">Observações</div>
-    <textarea id="obs" placeholder="Preencher somente se houver irregularidade"></textarea>
-</div>
+    <button onclick="iniciarChecklist()">Iniciar Checklist</button>
+  </div>
 
-<button class="btn-primary" onclick="salvarChecklist()">Salvar checklist</button>
-<button class="btn-primary" onclick="gerarPDF()">Gerar PDF</button>
+  <!-- TELA 2 -->
+  <div id="tela-checklist" class="card hidden">
+
+    <div class="header">
+      <!-- LOGO -->
+      <img src="logo.png" alt="Logo da empresa">
+      <div class="info" id="info-data"></div>
+      <div class="info" id="info-condutor"></div>
+      <div class="info" id="info-veiculo"></div>
+      <div class="info" id="info-periodo"></div>
+    </div>
+
+    <h2>Checklist</h2>
+    <p>Checklist será exibido aqui na próxima etapa.</p>
+
+  </div>
 
 </div>
 
 <script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
-}
+  function iniciarChecklist() {
+    const condutor = document.getElementById('condutor').value;
+    const veiculo = document.getElementById('veiculo').value;
+    const periodo = document.getElementById('periodo').value;
 
-const modelos = {
-    caminhao: [
-        "Motor liga normalmente",
-        "Não há vazamentos visíveis",
-        "Freios funcionando corretamente",
-        "Pneus em condição de rodagem",
-        "Luzes e setas funcionando",
-        "Buzina funcionando"
-    ],
-    f4000: [
-        "Motor liga normalmente",
-        "Não há vazamentos visíveis",
-        "Freios funcionando corretamente",
-        "Pneus em condição de rodagem",
-        "Luzes funcionando"
-    ],
-    montana: [
-        "Motor liga normalmente",
-        "Não há vazamentos visíveis",
-        "Freios funcionando corretamente",
-        "Pneus em bom estado",
-        "Luzes funcionando"
-    ],
-    empilhadeira: [
-        "Motor funcionando normalmente",
-        "Nível de óleo adequado",
-        "Sem vazamentos hidráulicos",
-        "Sistema de elevação funcionando",
-        "Buzina funcionando"
-    ]
-};
-
-let veiculos = JSON.parse(localStorage.getItem("veiculos")) || [];
-
-function atualizarVeiculos() {
-    veiculo.innerHTML = "<option value=''>Selecione o veículo</option>";
-    veiculos.forEach(v => {
-        veiculo.innerHTML += `<option value="${v.id}|${v.tipo}">${v.id}</option>`;
-    });
-}
-atualizarVeiculos();
-
-veiculo.onchange = () => {
-    const tipo = veiculo.value.split("|")[1];
-    checklist.innerHTML = "";
-    modelos[tipo]?.forEach(item => {
-        checklist.innerHTML += `
-            <div class="check-item">
-                <input type="checkbox">
-                <span>${item}</span>
-            </div>`;
-    });
-};
-
-function abrirCadastro() {
-    const id = prompt("Informe a PLACA ou PATRIMÔNIO do veículo");
-    const tipo = prompt("Tipo: caminhao, f4000, montana ou empilhadeira");
-    if (!id || !modelos[tipo]) return alert("Dados inválidos");
-    veiculos.push({ id, tipo });
-    localStorage.setItem("veiculos", JSON.stringify(veiculos));
-    atualizarVeiculos();
-}
-
-function salvarChecklist() {
-    if (!motorista.value || !veiculo.value) {
-        alert("Preencha o nome do motorista e selecione o veículo.");
-        return;
+    if (!condutor || !veiculo || !periodo) {
+      alert('Preencha todos os campos.');
+      return;
     }
-    localStorage.setItem(`checklist_${Date.now()}`, JSON.stringify({
-        motorista: motorista.value,
-        veiculo: veiculo.value,
-        data: new Date().toISOString(),
-        obs: obs.value
-    }));
-    alert("Checklist salvo com sucesso.");
-}
 
-function gerarPDF() {
-    const data = new Date().toISOString().slice(0,10);
-    html2pdf().from(document.getElementById("app"))
-        .save(`Checklist_Diario_${motorista.value}_${data}.pdf`);
-}
+    document.getElementById('tela-login').classList.add('hidden');
+    document.getElementById('tela-checklist').classList.remove('hidden');
+
+    const agora = new Date();
+    document.getElementById('info-data').innerText =
+      'Data/Hora: ' + agora.toLocaleString();
+
+    document.getElementById('info-condutor').innerText =
+      'Condutor: ' + condutor;
+
+    document.getElementById('info-veiculo').innerText =
+      'Veículo: ' + veiculo;
+
+    document.getElementById('info-periodo').innerText =
+      'Período: ' + periodo;
+  }
 </script>
 
 </body>
