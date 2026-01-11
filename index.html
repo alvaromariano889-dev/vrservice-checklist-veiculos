@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Checklist Veículos</title>
+<title>Checklist Veículos - VR Service</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -10,72 +10,95 @@
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  margin: 0;
+  background:#f4f6f8;
+  margin:0;
 }
-
 .container {
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
+  max-width: 900px;
+  margin:auto;
+  padding:20px;
 }
-
 .card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
 }
-
-.hidden { display: none; }
+.hidden { display:none; }
 
 input, select, textarea, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  font-size:14px;
 }
 
 button {
-  background: #007bff;
-  color: #fff;
-  border: none;
-  cursor: pointer;
+  background:#007bff;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+button:disabled {
+  background:#aaa;
+  cursor:not-allowed;
 }
 
 .header {
-  text-align: center;
-  margin-bottom: 15px;
+  text-align:center;
+  border-bottom:2px solid #ccc;
+  padding-bottom:10px;
+  margin-bottom:20px;
+}
+.header img {
+  max-width:150px;
 }
 
-.header img {
-  max-width: 150px;
+.company {
+  font-size:13px;
+  margin-top:5px;
 }
 
 .section {
-  margin-top: 20px;
+  margin-top:20px;
+}
+.section h3 {
+  background:#eee;
+  padding:8px;
+  font-size:15px;
 }
 
-.item {
-  display: grid;
-  grid-template-columns: 1fr 50px 50px 50px;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 8px;
-  font-size: 14px;
+.table {
+  width:100%;
+  border-collapse:collapse;
+}
+.table th, .table td {
+  border:1px solid #ccc;
+  padding:6px;
+  font-size:13px;
+}
+.table th {
+  background:#f0f0f0;
 }
 
-.head {
-  display: grid;
-  grid-template-columns: 1fr 50px 50px 50px;
-  font-weight: bold;
-  text-align: center;
+.radio-group {
+  display:flex;
+  justify-content:center;
+  gap:15px;
 }
+.radio-group label {
+  font-weight:bold;
+}
+.bom { color:#007bff; }
+.na { color:green; }
+.anormal { color:red; }
 
-.bom { accent-color: #007bff; }
-.na { accent-color: #28a745; }
-.anormal { accent-color: #dc3545; }
-
-.anormal:checked + span {
-  font-weight: bold;
+.assinatura {
+  margin-top:40px;
+}
+.assinatura div {
+  border-top:1px solid #000;
+  width:300px;
+  margin-top:40px;
 }
 </style>
 </head>
@@ -85,19 +108,18 @@ button {
 
 <!-- TELA 1 -->
 <div id="tela-login" class="card">
-  <h2>Identificação</h2>
+<h2>Identificação</h2>
+<input id="condutor" placeholder="Condutor">
+<input id="veiculo" placeholder="Veículo">
 
-  <input id="condutor" placeholder="Condutor">
-  <input id="veiculo" placeholder="Veículo">
+<select id="periodo">
+<option value="">Selecione o período</option>
+<option>Manhã</option>
+<option>Tarde</option>
+<option>Noite</option>
+</select>
 
-  <select id="periodo">
-    <option value="">Selecione o período</option>
-    <option>Manhã</option>
-    <option>Tarde</option>
-    <option>Noite</option>
-  </select>
-
-  <button onclick="iniciarChecklist()">Iniciar Checklist</button>
+<button onclick="iniciarChecklist()">Iniciar Checklist</button>
 </div>
 
 <!-- TELA 2 -->
@@ -106,86 +128,162 @@ button {
 <div id="area-pdf">
 
 <div class="header">
-  <img src="Logo.png">
-  <div><b>Vr Service Ltda</b></div>
-  <div>CNPJ: 31.590.236/0001-59</div>
-  <div>Av. Beira Rio Sul, 1169 - Cuiabá - MT</div>
-  <div id="info-data"></div>
-  <div id="info-condutor"></div>
-  <div id="info-veiculo"></div>
-  <div id="info-periodo"></div>
+<img src="Logo.png">
+<div class="company">
+<strong>VR Service Ltda</strong><br>
+CNPJ: 31.590.236/0001-59<br>
+Av. Beira Rio Sul, 1169 – Cuiabá/MT
+</div>
+<p id="info-data"></p>
+<p id="info-condutor"></p>
+<p id="info-veiculo"></p>
+<p id="info-periodo"></p>
+<p><strong>Checklist nº <span id="num-check"></span></strong></p>
 </div>
 
-<h2>Checklist Veículo</h2>
+<!-- TABELA PADRÃO -->
+<script>
+function linhaItem(nome, grupo){
+  return `
+  <tr>
+    <td>${nome}</td>
+    <td class="radio-group">
+      <label class="bom"><input type="radio" name="${grupo}" value="Bom"> Bom</label>
+    </td>
+    <td class="radio-group">
+      <label class="anormal"><input type="radio" name="${grupo}" value="Anormal"> Anormal</label>
+    </td>
+    <td class="radio-group">
+      <label class="na"><input type="radio" name="${grupo}" value="NA"> N.A</label>
+    </td>
+  </tr>`;
+}
+</script>
 
-<div class="head">
-  <div></div>
-  <div>Bom</div>
-  <div>N.A</div>
-  <div>Anormal</div>
+<!-- SEÇÕES -->
+<div class="section">
+<h3>Motor / Estrutura</h3>
+<table class="table">
+<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
+<script>
+document.write(
+linhaItem("Ausência de vazamentos", "m1") +
+linhaItem("Estrutura sem trincas", "m2")
+);
+</script>
+</table>
 </div>
 
 <div class="section">
-  <h3>Motor / Estrutura</h3>
-
-  <div class="item">
-    <label>Ausência de vazamentos</label>
-    <input class="bom" type="radio" name="m1">
-    <input class="na" type="radio" name="m1">
-    <input class="anormal" type="radio" name="m1">
-  </div>
-
-  <div class="item">
-    <label>Estrutura sem trincas</label>
-    <input class="bom" type="radio" name="m2">
-    <input class="na" type="radio" name="m2">
-    <input class="anormal" type="radio" name="m2">
-  </div>
+<h3>Pneus / Rodas</h3>
+<table class="table">
+<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
+<script>
+document.write(
+linhaItem("Pneus em bom estado", "p1") +
+linhaItem("Calibragem adequada", "p2") +
+linhaItem("Rodas e porcas firmes", "p3")
+);
+</script>
+</table>
 </div>
 
 <div class="section">
-  <h3>Observações</h3>
-  <textarea id="observacoes" rows="4"></textarea>
+<h3>Garfos e Mastro</h3>
+<table class="table">
+<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
+<script>
+document.write(
+linhaItem("Garfos sem trincas", "g1") +
+linhaItem("Travas funcionando", "g2") +
+linhaItem("Correntes em bom estado", "g3") +
+linhaItem("Elevação funcionando", "g4")
+);
+</script>
+</table>
 </div>
 
 <div class="section">
-  <h3>Assinatura</h3>
-  <div style="border-bottom:1px solid #000; height:40px;"></div>
+<h3>Freios e Direção</h3>
+<table class="table">
+<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
+<script>
+document.write(
+linhaItem("Freio de serviço", "f1") +
+linhaItem("Freio estacionamento", "f2") +
+linhaItem("Direção sem folga", "f3")
+);
+</script>
+</table>
+</div>
+
+<div class="section">
+<h3>Sistema Elétrico</h3>
+<table class="table">
+<tr><th>Item</th><th>Bom</th><th>Anormal</th><th>N.A</th></tr>
+<script>
+document.write(
+linhaItem("Buzina", "e1") +
+linhaItem("Luzes", "e2") +
+linhaItem("Painel", "e3") +
+linhaItem("Alarme de ré", "e4")
+);
+</script>
+</table>
+</div>
+
+<label>Observações (obrigatório se houver Anormal)</label>
+<textarea id="observacoes"></textarea>
+
+<div class="assinatura">
+<div>Assinatura do Condutor</div>
 </div>
 
 </div>
 
-<button onclick="salvarChecklist()">Salvar PDF</button>
-
+<button id="btnSalvar" disabled onclick="salvarChecklist()">Salvar PDF</button>
 </div>
 </div>
 
 <script>
-function iniciarChecklist() {
-  const condutor = document.getElementById("condutor").value.trim();
-  const veiculo = document.getElementById("veiculo").value.trim();
-  const periodo = document.getElementById("periodo").value;
+let contador = Math.floor(Math.random()*90000)+10000;
+document.getElementById("num-check").innerText = contador;
 
-  if (!condutor || !veiculo || !periodo) {
-    alert("Preencha todos os campos");
-    return;
-  }
+function iniciarChecklist(){
+const c = condutor.value.trim();
+const v = veiculo.value.trim();
+const p = periodo.value;
+if(!c || !v || !p){ alert("Preencha todos os campos"); return; }
 
-  document.getElementById("tela-login").classList.add("hidden");
-  document.getElementById("tela-checklist").classList.remove("hidden");
+tela-login.classList.add("hidden");
+tela-checklist.classList.remove("hidden");
 
-  document.getElementById("info-data").innerText =
-    "Data/Hora: " + new Date().toLocaleString();
-  document.getElementById("info-condutor").innerText =
-    "Condutor: " + condutor;
-  document.getElementById("info-veiculo").innerText =
-    "Veículo: " + veiculo;
-  document.getElementById("info-periodo").innerText =
-    "Período: " + periodo;
+info-data.innerText = "Data/Hora: " + new Date().toLocaleString();
+info-condutor.innerText = "Condutor: " + c;
+info-veiculo.innerText = "Veículo: " + v;
+info-periodo.innerText = "Período: " + p;
 }
 
-function salvarChecklist() {
-  html2pdf().from(document.getElementById("area-pdf")).save();
+document.addEventListener("change",()=>{
+const radios = document.querySelectorAll("input[type=radio]");
+const grupos = {};
+radios.forEach(r=>{
+  grupos[r.name]=grupos[r.name]||false;
+  if(r.checked) grupos[r.name]=true;
+});
+const tudo = Object.values(grupos).every(v=>v);
+const anormal = [...radios].some(r=>r.checked && r.value==="Anormal");
+const obs = observacoes.value.trim();
+btnSalvar.disabled = !(tudo && (!anormal || obs));
+});
+
+function salvarChecklist(){
+html2pdf().set({
+margin:10,
+filename:"Checklist_"+contador+".pdf",
+html2canvas:{scale:2},
+jsPDF:{format:"a4",orientation:"portrait"}
+}).from(area-pdf).save();
 }
 </script>
 
