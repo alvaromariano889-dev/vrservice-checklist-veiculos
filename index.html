@@ -304,5 +304,36 @@
 
 </div>
 
+<script>
+  function iniciarChecklist() {
+    const condutor = document.getElementById('condutor').value.trim();
+    const veiculo = document.getElementById('veiculo').value.trim();
+    const periodo = document.getElementById('periodo').value;
+
+    if (!condutor || !veiculo || !periodo) {
+      alert('Preencha todos os campos.');
+      return;
+    }
+
+    document.getElementById('tela-login').classList.add('hidden');
+    document.getElementById('tela-checklist').classList.remove('hidden');
+
+    const agora = new Date();
+    document.getElementById('info-data').innerText =
+      'Data/Hora: ' + agora.toLocaleString();
+
+    document.getElementById('info-condutor').innerText =
+      'Condutor: ' + condutor;
+
+    document.getElementById('info-veiculo').innerText =
+      'Veículo: ' + veiculo;
+
+    document.getElementById('info-periodo').innerText =
+      'Período: ' + periodo;
+  }
+</script>
+</body>
+</html>
+
 
 
