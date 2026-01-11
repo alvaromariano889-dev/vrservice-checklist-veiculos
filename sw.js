@@ -3,8 +3,7 @@ const urlsToCache = [
   'index.html',
   'manifest.json',
   'sw.js',
-  'Logo.png',
-  'icon-512.png'
+  'Logo.png'
 ];
 
 self.addEventListener('install', e => {
@@ -15,7 +14,6 @@ self.addEventListener('install', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(response => response || fetch(e.request))
+    caches.match(e.request).then(r => r || fetch(e.request))
   );
 });
-
