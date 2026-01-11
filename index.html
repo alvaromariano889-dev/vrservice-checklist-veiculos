@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Checklist Veículos - VR Service</title>
+<title>Checklist Veículos</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,19 +13,22 @@ body {
   background: #f4f6f8;
   margin: 0;
 }
+
 .container {
   max-width: 420px;
   margin: auto;
   padding: 20px;
 }
+
 .card {
   background: #fff;
   padding: 20px;
   border-radius: 10px;
 }
+
 .hidden { display: none; }
 
-input, select, button, textarea {
+input, select, textarea, button {
   width: 100%;
   padding: 10px;
   margin-top: 10px;
@@ -35,63 +38,44 @@ button {
   background: #007bff;
   color: #fff;
   border: none;
-  font-weight: bold;
+  cursor: pointer;
 }
 
 .header {
   text-align: center;
   margin-bottom: 15px;
 }
+
 .header img {
-  max-width: 140px;
+  max-width: 150px;
 }
 
-.pdf {
-  font-size: 12px;
-}
-.pdf h2 {
-  text-align: center;
-  margin: 10px 0;
-}
-.info-line {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-th, td {
-  border: 1px solid #000;
-  padding: 6px;
-}
-th {
-  text-align: center;
-}
-td:first-child {
-  width: 65%;
-}
-td {
-  text-align: center;
-}
-
-.anormal {
-  font-weight: bold;
-}
-
-.obs {
-  margin-top: 15px;
-}
-
-.assinaturas {
-  margin-top: 25px;
-}
-.assinaturas div {
+.section {
   margin-top: 20px;
-  border-top: 1px solid #000;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1fr 50px 50px 50px;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: 1fr 50px 50px 50px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.bom { accent-color: #007bff; }
+.na { accent-color: #28a745; }
+.anormal { accent-color: #dc3545; }
+
+.anormal:checked + span {
+  font-weight: bold;
 }
 </style>
 </head>
@@ -119,121 +103,89 @@ td {
 <!-- TELA 2 -->
 <div id="tela-checklist" class="card hidden">
 
-<div id="area-pdf" class="pdf">
+<div id="area-pdf">
 
 <div class="header">
   <img src="Logo.png">
-  <strong>VR SERVICE LTDA</strong><br>
-  CNPJ: 31.590.236/0001-59<br>
-  Av. Beira Rio Sul, 1169 – Jardim Califórnia<br>
-  Cuiabá – MT – CEP 78070-500
-</div>
-
-<hr>
-
-<div class="info-line">
-  <div id="info-condutor"></div>
+  <div><b>Vr Service Ltda</b></div>
+  <div>CNPJ: 31.590.236/0001-59</div>
+  <div>Av. Beira Rio Sul, 1169 - Cuiabá - MT</div>
   <div id="info-data"></div>
-</div>
-<div class="info-line">
+  <div id="info-condutor"></div>
   <div id="info-veiculo"></div>
   <div id="info-periodo"></div>
 </div>
-<div class="info-line">
-  <div id="info-numero"></div>
+
+<h2>Checklist Veículo</h2>
+
+<div class="head">
+  <div></div>
+  <div>Bom</div>
+  <div>N.A</div>
+  <div>Anormal</div>
 </div>
 
-<h2>Checklist de Veículos</h2>
+<div class="section">
+  <h3>Motor / Estrutura</h3>
 
-<table>
-<tr>
-  <th>Item</th>
-  <th>BOM</th>
-  <th>ANORMAL</th>
-  <th>N.A</th>
-</tr>
+  <div class="item">
+    <label>Ausência de vazamentos</label>
+    <input class="bom" type="radio" name="m1">
+    <input class="na" type="radio" name="m1">
+    <input class="anormal" type="radio" name="m1">
+  </div>
 
-<tr>
-<td>Ausência de vazamentos</td>
-<td><input type="radio" name="i1" value="bom"></td>
-<td><input type="radio" name="i1" value="anormal"></td>
-<td><input type="radio" name="i1" value="na"></td>
-</tr>
-
-<tr>
-<td>Pneus em bom estado</td>
-<td><input type="radio" name="i2" value="bom"></td>
-<td><input type="radio" name="i2" value="anormal"></td>
-<td><input type="radio" name="i2" value="na"></td>
-</tr>
-
-<tr>
-<td>Freios funcionando</td>
-<td><input type="radio" name="i3" value="bom"></td>
-<td><input type="radio" name="i3" value="anormal"></td>
-<td><input type="radio" name="i3" value="na"></td>
-</tr>
-</table>
-
-<div class="obs">
-<strong>Observações (obrigatório se houver Anormal):</strong>
-<textarea id="observacoes"></textarea>
+  <div class="item">
+    <label>Estrutura sem trincas</label>
+    <input class="bom" type="radio" name="m2">
+    <input class="na" type="radio" name="m2">
+    <input class="anormal" type="radio" name="m2">
+  </div>
 </div>
 
-<div class="assinaturas">
-<div>Assinatura do Condutor</div>
-<div>Assinatura do Responsável</div>
+<div class="section">
+  <h3>Observações</h3>
+  <textarea id="observacoes" rows="4"></textarea>
+</div>
+
+<div class="section">
+  <h3>Assinatura</h3>
+  <div style="border-bottom:1px solid #000; height:40px;"></div>
 </div>
 
 </div>
 
 <button onclick="salvarChecklist()">Salvar PDF</button>
-</div>
 
+</div>
 </div>
 
 <script>
 function iniciarChecklist() {
-  const condutor = condutorEl.value.trim();
-  const veiculo = veiculoEl.value.trim();
-  const periodo = periodoEl.value;
+  const condutor = document.getElementById("condutor").value.trim();
+  const veiculo = document.getElementById("veiculo").value.trim();
+  const periodo = document.getElementById("periodo").value;
 
   if (!condutor || !veiculo || !periodo) {
-    alert("Preencha todos os campos.");
+    alert("Preencha todos os campos");
     return;
   }
 
-  tela-login.classList.add("hidden");
-  tela-checklist.classList.remove("hidden");
+  document.getElementById("tela-login").classList.add("hidden");
+  document.getElementById("tela-checklist").classList.remove("hidden");
 
-  const agora = new Date();
-  const numero = "CHK-" + agora.getTime();
-
-  info-condutor.innerText = "Condutor: " + condutor;
-  info-veiculo.innerText = "Veículo: " + veiculo;
-  info-periodo.innerText = "Período: " + periodo;
-  info-data.innerText = "Data/Hora: " + agora.toLocaleString();
-  info-numero.innerText = "Checklist Nº: " + numero;
+  document.getElementById("info-data").innerText =
+    "Data/Hora: " + new Date().toLocaleString();
+  document.getElementById("info-condutor").innerText =
+    "Condutor: " + condutor;
+  document.getElementById("info-veiculo").innerText =
+    "Veículo: " + veiculo;
+  document.getElementById("info-periodo").innerText =
+    "Período: " + periodo;
 }
 
 function salvarChecklist() {
-  const radios = document.querySelectorAll("input[type=radio]");
-  let anormal = false;
-
-  radios.forEach(r => {
-    if (r.checked && r.value === "anormal") anormal = true;
-  });
-
-  if (anormal && !observacoes.value.trim()) {
-    alert("Preencha as observações.");
-    return;
-  }
-
-  html2pdf().set({
-    filename: "Checklist_VR_Service.pdf",
-    html2canvas: { scale: 2 },
-    jsPDF: { format: "a4", orientation: "portrait" }
-  }).from(area-pdf).save();
+  html2pdf().from(document.getElementById("area-pdf")).save();
 }
 </script>
 
