@@ -6,222 +6,81 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json">
 
-<!-- PDF A4 -->
+<!-- html2pdf -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 /* =============================
    ESTILO GERAL DO CHECKLIST
    ============================= */
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  padding: 10px;
-}
+body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 10px; }
+.container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 6px; }
+.logo { text-align: center; margin-bottom: 10px; }
+.logo img { max-width: 150px; display: block; margin: 0 auto; }
+h2, .datetime { text-align: center; margin: 5px 0; }
+label { font-weight: bold; display: block; margin-top: 8px; }
+input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+button { margin-top: 15px; padding: 12px 24px; font-size: 16px; cursor: pointer; border: none; border-radius: 6px; background: #0a7cff; color: white; }
+button:hover:not(:disabled) { background: #0962d8; }
+button:disabled { background: #ccc; cursor: not-allowed; }
 
-.container {
-  max-width: 900px;
-  margin: auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 6px;
-}
+/* TELAS */
+.tela { display: none; }
+.tela.ativa { display: block; }
 
-.logo {
-  text-align: center;
-  margin-bottom: 10px;
-}
+/* GRID DE SELEÇÃO */
+.grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
+.grid > div { flex: 1 1 280px; min-width: 250px; }
 
-.logo img {
-  max-width: 150px;
-  display: block;
-  margin: 0 auto;
-}
+/* RESUMO */
+.resumo { background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0; }
+.resumo p { margin: 5px 0; font-size: 16px; }
 
-h2, .datetime {
-  text-align: center;
-  margin: 5px 0;
-}
-
-label {
-  font-weight: bold;
-  display: block;
-  margin-top: 8px;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  margin-top: 15px;
-  padding: 12px 24px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  background: #0a7cff;
-  color: white;
-}
-
-button:hover:not(:disabled) {
-  background: #0962d8;
-}
-
-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-/* =============================
-   TELAS
-   ============================= */
-.tela {
-  display: none;
-}
-.tela.ativa {
-  display: block;
-}
-
-/* =============================
-   GRID DE SELEÇÃO
-   ============================= */
-.grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 20px;
-}
-.grid > div {
-  flex: 1 1 280px;
-  min-width: 250px;
-}
-
-/* =============================
-   RESUMO
-   ============================= */
-.resumo {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 6px;
-  margin: 15px 0;
-}
-.resumo p {
-  margin: 5px 0;
-  font-size: 16px;
-}
-
-/* =============================
-   TABELA
-   ============================= */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-}
-.table th, .table td {
-  border: 1px solid #333;
-  padding: 8px;
-  font-size: 14px;
-  text-align: center;
-  cursor: pointer; /* indica que pode clicar */
-  height: 25px;
-}
-.table th {
-  background: #e9ecef;
-  font-weight: bold;
-}
-.table th:first-child, .table td:first-child {
-  text-align: left;
-  width: 40%;
-}
+/* TABELA */
+.table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+.table th, .table td { border: 1px solid #333; padding: 8px; font-size: 14px; text-align: center; cursor: pointer; height: 25px; }
+.table th { background: #e9ecef; font-weight: bold; }
+.table th:first-child, .table td:first-child { text-align: left; width: 40%; }
 
 /* cores dos estados */
-.bom { background: #c8f7c5 !important; }
-.anormal { background: #fff3b0 !important; }
-.na { background: #c5d9f7 !important; }
+.bom { background: #fff; }
+.anormal { background: #fff; }
+.na { background: #fff; }
 
 /* destaque ANORMAL no PDF */
 .anormal-pdf { background: #ff4d4f !important; color: white !important; }
 
-/* =============================
-   OBSERVAÇÕES
-   ============================= */
-.obs-box {
-  margin: 20px 0;
-}
+/* OBSERVAÇÕES */
+.obs-box { margin: 20px 0; }
 
-/* =============================
-   KM/HORIMETRO
-   ============================= */
-#kmHorimetro {
-  width: 200px !important;
-  display: inline-block;
-}
+/* KM/HORIMETRO */
+#kmHorimetro { width: 200px !important; display: inline-block; }
 
-/* =============================
-   RODAPÉ
-   ============================= */
-.rodape {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 14px;
-}
+/* RODAPÉ */
+.rodape { text-align: center; margin-top: 20px; font-size: 14px; }
 
-/* =============================
-   PDF ENQUADRADO RETRATO
-   ============================= */
-#pdf-content {
-  width: 190mm;
-  margin: 0 auto;
-  padding: 10mm;
-}
+/* PDF ENQUADRADO RETRATO */
+#pdf-content { width: 190mm; margin: 0 auto; padding: 10mm; display:none; }
+#pdf-content .container { width: 100%; margin: 0; padding: 0; }
+#pdf-content h2, #pdf-content p { text-align: center; }
+#pdf-content .table { width: 100%; border-collapse: collapse; }
+#pdf-content .rodape { text-align: center; font-size: 14px; margin-top: 20px; }
 
-#pdf-content .container {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-#pdf-content .table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-#pdf-content h2, #pdf-content p {
-  text-align: center;
-}
-
-/* =============================
-   MEDIA PRINT PARA PDF
-   ============================= */
-@media print {
-  body { background: white; }
-  .container { max-width: none; padding: 10mm; }
-  .tela:not(.ativa), button { display: none !important; }
-}
-
+/* MEDIA PRINT PARA PDF */
+@media print { body { background: white; } .container { max-width: none; padding: 10mm; } .tela:not(.ativa), button { display: none !important; } }
 </style>
 </head>
 
 <body>
 
+<!-- PDF escondido -->
 <div id="pdf-content">
-
-  <!-- CABEÇALHO -->
   <div class="container">
-    <div class="logo">
-      <img src="Logo.png" alt="Logo da Empresa">
-    </div>
+    <div class="logo"><img src="Logo.png" alt="Logo da Empresa"></div>
     <h2>Checklist Diário de Inspeção</h2>
-    <p style="text-align:center">CNPJ: 00.000.000/0000-00</p>
+    <p>CNPJ: 00.000.000/0000-00</p>
   </div>
 
-  <!-- RESUMO + TABELA -->
   <div class="container">
     <div class="resumo">
       <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
@@ -231,7 +90,7 @@ button:disabled {
       <p><strong>Data e Hora:</strong> <span id="datetime-pdf"></span></p>
     </div>
 
-    <table class="table" id="tabela">
+    <table class="table" id="tabelaPDF">
       <thead>
         <tr>
           <th>ITEM</th>
@@ -249,134 +108,112 @@ button:disabled {
     </div>
   </div>
 
-  <!-- RODAPÉ -->
   <div class="rodape">
-    Endereço: Rua Exemplo, 123 - Cidade - CEP 00000-000
+    Endereço: Av. Exemplo, 123 - Cidade - CEP 00000-000
   </div>
 </div>
 
-  <!-- TELA 1: SELEÇÃO -->
-  <div class="container tela ativa" id="tela-selecao">
-    <h3>📋 Dados iniciais</h3>
-
-    <div class="grid">
-      <div>
-        <label>Motorista / Operador</label>
-       <input type="text" id="motorista" placeholder="Digite o nome do motorista">
-          <option value="">Digite ou selecione</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Veículo / Placa ou Patrimônio</label>
-         <input type="text" id="veiculo" placeholder="Digite a placa ou patrimônio">
-          <option value="">Digite ou selecione</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Tipo de Veículo</label>
-        <select id="tipo">
-          <option value="">Selecione</option>
-          <option value="empilhadeira">Empilhadeira</option>
-          <option value="carro">Carro</option>
-          <option value="bau">Caminhão Baú</option>
-          <option value="f400">Caminhão Aberto (F400)</option>
-        </select>
-      </div>
+<!-- TELA 1: SELEÇÃO -->
+<div class="container tela ativa" id="tela-selecao">
+  <h3>📋 Dados iniciais</h3>
+  <div class="grid">
+    <div>
+      <label>Motorista / Operador</label>
+      <input type="text" id="motorista" placeholder="Digite o nome do motorista">
     </div>
-
-    <button onclick="irParaChecklist()">➡️ Continuar para checklist</button>
-  </div>
-
-  <!-- TELA 2: CHECKLIST -->
-  <div class="container tela" id="tela-checklist">
-    <div class="resumo">
-      <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
-      <p><strong>Veículo:</strong> <span id="resumoVeiculo"></span></p>
-      <p><strong>Tipo:</strong> <span id="resumoTipo"></span></p>
-      <p><strong>KM ou Horímetro:</strong> <input type="number" id="kmHorimetro" min="0"></p>
-      <p><strong>Data e Hora:</strong> <span id="datetime-pdf"></span></p>
+    <div>
+      <label>Veículo / Placa ou Patrimônio</label>
+      <input type="text" id="veiculo" placeholder="Digite a placa ou patrimônio">
     </div>
-
-    <table class="table" id="tabela">
-      <thead>
-        <tr>
-          <th>ITEM</th>
-          <th>BOM</th>
-          <th>ANORMAL</th>
-          <th>N.A.</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <div class="obs-box">
-      <label>Observações (obrigatório se houver item ANORMAL)</label>
-      <textarea id="obs" rows="3" placeholder="Descreva qualquer irregularidade encontrada..."></textarea>
-    </div>
-
-    <button onclick="voltarSelecao()">⬅️ Voltar</button>
-    <button id="salvar" onclick="salvarChecklist()" disabled>💾 Salvar Checklist</button>
-    <button id="pdfBtn" onclick="gerarPDF()">📄 Gerar PDF</button>
-
-    <div class="rodape">
-      Endereço da empresa: Av. Beira Rio Sul, 1169 - Jardim California - Cuiabá - CEP 78070-500
+    <div>
+      <label>Tipo de Veículo</label>
+      <select id="tipo">
+        <option value="">Selecione</option>
+        <option value="empilhadeira">Empilhadeira</option>
+        <option value="carro">Carro</option>
+        <option value="bau">Caminhão Baú</option>
+        <option value="f400">Caminhão Aberto (F400)</option>
+      </select>
     </div>
   </div>
+  <button onclick="irParaChecklist()">➡️ Continuar para checklist</button>
+</div>
 
+<!-- TELA 2: CHECKLIST -->
+<div class="container tela" id="tela-checklist">
+  <div class="resumo">
+    <p><strong>Motorista:</strong> <span id="resumoMotoristaCheck"></span></p>
+    <p><strong>Veículo:</strong> <span id="resumoVeiculoCheck"></span></p>
+    <p><strong>Tipo:</strong> <span id="resumoTipoCheck"></span></p>
+    <p><strong>KM ou Horímetro:</strong> <input type="number" id="kmHorimetro" min="0"></p>
+    <p><strong>Data e Hora:</strong> <span id="datetimeCheck"></span></p>
+  </div>
+
+  <table class="table" id="tabelaCheck">
+    <thead>
+      <tr>
+        <th>ITEM</th>
+        <th>BOM</th>
+        <th>ANORMAL</th>
+        <th>N.A.</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="obs-box">
+    <label>Observações (obrigatório se houver item ANORMAL)</label>
+    <textarea id="obs" rows="3" placeholder="Descreva qualquer irregularidade..."></textarea>
+  </div>
+
+  <button onclick="voltarSelecao()">⬅️ Voltar</button>
+  <button id="salvar" onclick="salvarChecklist()" disabled>💾 Salvar Checklist</button>
+  <button onclick="gerarPDF()">📄 Gerar PDF</button>
+
+  <div class="rodape">
+    Endereço da empresa: Av. Beira Rio Sul, 1169 - Jardim California - Cuiabá - CEP 78070-500
+  </div>
 </div>
 
 <script>
-// PREENCHE DATA E HORA
-document.getElementById('datetime').innerText = new Date().toLocaleString();
-
 // MODELOS DE CHECKLIST
 const modelos = {
-  empilhadeira: [
-    "Pneus e Rodas (calibragem)",
-    "Garfos (patins) e mastro",
-    "Vazamentos",
-    "Nível de óleo do motor",
-    "Nível de óleo hidráulico",
-    "Freios",
-    "Buzina / sinalização"
-  ],
-  carro: [
-    "Luzes",
-    "Vazamentos",
-    "Espelhos e vidros"
-  ],
+  empilhadeira: ["Pneus e Rodas (calibragem)","Garfos (patins) e mastro","Vazamentos","Nível de óleo do motor","Nível de óleo hidráulico","Freios","Buzina / sinalização"],
+  carro: ["Luzes","Vazamentos","Espelhos e vidros"],
   bau: ["Pneus","Luzes","Vazamentos","Freios"],
   f400: ["Pneus","Luzes","Vazamentos","Freios"]
 };
 
-// FUNÇÕES PARA TROCAR DE TELA
+// DATA/HORA
+document.getElementById('datetimeCheck').innerText = new Date().toLocaleString();
+
+// TROCAR DE TELA
 function irParaChecklist(){
   const motorista = document.getElementById('motorista').value;
   const veiculo = document.getElementById('veiculo').value;
   const tipo = document.getElementById('tipo').value;
 
   if(!motorista || !veiculo || !tipo){
-    alert("Preencha todos os campos antes de continuar!");
+    alert("Preencha todos os campos!");
     return;
   }
 
-  document.getElementById('resumoMotorista').innerText = motorista;
-  document.getElementById('resumoVeiculo').innerText = veiculo;
-  document.getElementById('resumoTipo').innerText = tipo;
+  // Atualiza resumo da tela checklist
+  document.getElementById('resumoMotoristaCheck').innerText = motorista;
+  document.getElementById('resumoVeiculoCheck').innerText = veiculo;
+  document.getElementById('resumoTipoCheck').innerText = tipo;
 
-  // Preenche a tabela de itens
-  const tbody = document.querySelector('#tabela tbody');
+  // Preenche tabela da tela checklist
+  const tbody = document.querySelector('#tabelaCheck tbody');
   tbody.innerHTML = "";
   modelos[tipo].forEach(item=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
-  <td>${item}</td>
-  <td class="bom" onclick="selecionar(this)"></td>
-  <td class="anormal" onclick="selecionar(this)"></td>
-  <td class="na" onclick="selecionar(this)"></td>
-`;
+      <td>${item}</td>
+      <td class="bom" onclick="selecionar(this)"></td>
+      <td class="anormal" onclick="selecionar(this)"></td>
+      <td class="na" onclick="selecionar(this)"></td>
+    `;
     tbody.appendChild(tr);
   });
 
@@ -385,10 +222,10 @@ function irParaChecklist(){
   verificarSalvar();
 }
 
-// SELEÇÃO DE CELULAS
+// SELEÇÃO CELULAS
 function selecionar(td){
   td.parentNode.querySelectorAll('td').forEach(cell=>{
-    cell.style.backgroundColor = ""; // reset
+    if(cell !== td.parentNode.children[0]) cell.style.backgroundColor = "";
   });
   td.style.backgroundColor = td.classList.contains('bom') ? "#c8f7c5"
     : td.classList.contains('anormal') ? "#fff3b0"
@@ -396,12 +233,12 @@ function selecionar(td){
   verificarSalvar();
 }
 
-// VERIFICA SE PODE ATIVAR O BOTÃO SALVAR
+// VERIFICA SALVAR
 function verificarSalvar(){
-  const tbody = document.querySelectorAll('#tabela tbody tr');
+  const tbody = document.querySelectorAll('#tabelaCheck tbody tr');
   let habilitar = tbody.length > 0;
   tbody.forEach(tr=>{
-    if(!Array.from(tr.children).some(td=>td.style.backgroundColor)) habilitar = false;
+    if(!Array.from(tr.children).slice(1).some(td=>td.style.backgroundColor)) habilitar=false;
   });
   document.getElementById('salvar').disabled = !habilitar;
 }
@@ -412,57 +249,41 @@ function voltarSelecao(){
   document.getElementById('tela-selecao').classList.add('ativa');
 }
 
-// SALVAR (exemplo simples)
+// SALVAR
 function salvarChecklist(){
   alert("Checklist salvo com sucesso!");
 }
 
 // GERAR PDF
 function gerarPDF(){
-  const element = document.getElementById('pdf-content'); // captura toda área do PDF
+  const pdfDiv = document.getElementById('pdf-content');
 
-  // Destacar itens ANORMAIS em vermelho para PDF
-  document.querySelectorAll('#tabela tbody tr').forEach(tr=>{
-    if(tr.querySelector('.anormal').style.backgroundColor === "rgb(255, 243, 176)"){ // amarelo
-      tr.classList.add('anormal-pdf');
-    } else {
-      tr.classList.remove('anormal-pdf');
-    }
+  // Atualiza dados PDF
+  document.getElementById('resumoMotorista').innerText = document.getElementById('motorista').value;
+  document.getElementById('resumoVeiculo').innerText = document.getElementById('veiculo').value;
+  document.getElementById('resumoTipo').innerText = document.getElementById('tipo').value;
+  document.getElementById('kmPDF').innerText = document.getElementById('kmHorimetro').value;
+  document.getElementById('datetime-pdf').innerText = new Date().toLocaleString();
+  document.getElementById('obs-pdf').innerText = document.getElementById('obs').value;
+
+  // Copiar tabela
+  const tbodyPDF = document.querySelector('#tabelaPDF tbody');
+  const tbodyCheck = document.querySelector('#tabelaCheck tbody');
+  tbodyPDF.innerHTML = tbodyCheck.innerHTML;
+
+  // Destacar ANORMAIS
+  tbodyPDF.querySelectorAll('tr').forEach(tr=>{
+    const tdAnormal = tr.querySelector('.anormal');
+    if(tdAnormal.style.backgroundColor === "rgb(255, 243, 176)"){ tr.classList.add('anormal-pdf'); }
   });
 
-  // Substituir textarea de observações por div temporária
-  const obs = document.getElementById('obs');
-  const obsDiv = document.createElement('div');
-  obsDiv.innerText = obs.value;
-  obsDiv.style.border = "1px solid #ccc";
-  obsDiv.style.padding = "8px";
-  obsDiv.style.borderRadius = "4px";
-  obsDiv.style.minHeight = "50px";
-  obsDiv.id = "obs-pdf";
-  obs.parentNode.replaceChild(obsDiv, obs);
-
-  // Colocar data e hora no PDF
-  const datetimeSpan = document.getElementById('datetime-pdf');
-  datetimeSpan.innerText = new Date().toLocaleString();
-
-  // Colocar valor do KM/Horímetro no PDF
-  const kmInput = document.getElementById('kmHorimetro');
-  const kmSpan = document.createElement('span');
-  kmSpan.innerText = kmInput.value;
-  kmInput.parentNode.replaceChild(kmSpan, kmInput);
-
-  const opt = {
-    margin: 10,
-    filename: `Checklist_${new Date().toISOString().slice(0,10)}.pdf`,
+  html2pdf().set({
+    margin:10,
+    filename:`Checklist_${new Date().toISOString().slice(0,10)}.pdf`,
     image:{type:'jpeg',quality:0.98},
     html2canvas:{scale:2},
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  };
-
-  html2pdf().set(opt).from(element).save().then(()=>{
-    kmSpan.parentNode.replaceChild(kmInput, kmSpan);
-    obsDiv.parentNode.replaceChild(obs, obsDiv);
-  });
+  }).from(pdfDiv).save();
 }
 
 // SERVICE WORKER
@@ -474,5 +295,3 @@ if('serviceWorker' in navigator){
 </script>
 </body>
 </html>
-
-
