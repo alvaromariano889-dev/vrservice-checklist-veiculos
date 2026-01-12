@@ -10,6 +10,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+/* =============================
+   ESTILO GERAL DO CHECKLIST
+   ============================= */
 body {
   font-family: Arial, sans-serif;
   background: #f4f4f4;
@@ -24,8 +27,16 @@ body {
   border-radius: 6px;
 }
 
-.logo { text-align:center; margin-bottom:10px; }
-.logo img { max-width:150px; }
+.logo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.logo img {
+  max-width: 150px;
+  display: block;
+  margin: 0 auto;
+}
 
 h2, .datetime {
   text-align: center;
@@ -66,7 +77,9 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* telas */
+/* =============================
+   TELAS
+   ============================= */
 .tela {
   display: none;
 }
@@ -74,7 +87,9 @@ button:disabled {
   display: block;
 }
 
-/* seleção */
+/* =============================
+   GRID DE SELEÇÃO
+   ============================= */
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -86,7 +101,9 @@ button:disabled {
   min-width: 250px;
 }
 
-/* resumo */
+/* =============================
+   RESUMO
+   ============================= */
 .resumo {
   background: #f8f9fa;
   padding: 15px;
@@ -98,7 +115,9 @@ button:disabled {
   font-size: 16px;
 }
 
-/* tabela */
+/* =============================
+   TABELA
+   ============================= */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -106,9 +125,11 @@ button:disabled {
 }
 .table th, .table td {
   border: 1px solid #333;
-  padding: 10px 8px;
-  text-align: center;
+  padding: 8px;
   font-size: 14px;
+  text-align: center;
+  cursor: pointer; /* indica que pode clicar */
+  height: 25px;
 }
 .table th {
   background: #e9ecef;
@@ -119,31 +140,71 @@ button:disabled {
   width: 40%;
 }
 
+/* cores dos estados */
 .bom { background: #c8f7c5 !important; }
 .anormal { background: #fff3b0 !important; }
 .na { background: #c5d9f7 !important; }
 
-/* PDF destaque ANORMAL */
+/* destaque ANORMAL no PDF */
 .anormal-pdf { background: #ff4d4f !important; color: white !important; }
 
+/* =============================
+   OBSERVAÇÕES
+   ============================= */
 .obs-box {
   margin: 20px 0;
 }
 
+/* =============================
+   KM/HORIMETRO
+   ============================= */
 #kmHorimetro {
   width: 200px !important;
   display: inline-block;
 }
 
-/* rodape */
-.rodape { text-align:center; margin-top:20px; font-size:14px; }
+/* =============================
+   RODAPÉ
+   ============================= */
+.rodape {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
 
-/* PDF otimizado */
+/* =============================
+   PDF ENQUADRADO RETRATO
+   ============================= */
+#pdf-content {
+  width: 190mm;
+  margin: 0 auto;
+  padding: 10mm;
+}
+
+#pdf-content .container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#pdf-content .table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#pdf-content h2, #pdf-content p {
+  text-align: center;
+}
+
+/* =============================
+   MEDIA PRINT PARA PDF
+   ============================= */
 @media print {
   body { background: white; }
   .container { max-width: none; padding: 10mm; }
   .tela:not(.ativa), button { display: none !important; }
 }
+
 </style>
 </head>
 
@@ -151,15 +212,48 @@ button:disabled {
 
 <div id="pdf-content">
 
-  <!-- LOGO E TITULO -->
+  <!-- CABEÇALHO -->
   <div class="container">
     <div class="logo">
       <img src="Logo.png" alt="Logo da Empresa">
     </div>
     <h2>Checklist Diário de Inspeção</h2>
     <p style="text-align:center">CNPJ: 00.000.000/0000-00</p>
-    <div class="datetime" id="datetime"></div>
   </div>
+
+  <!-- RESUMO + TABELA -->
+  <div class="container">
+    <div class="resumo">
+      <p><strong>Motorista:</strong> <span id="resumoMotorista"></span></p>
+      <p><strong>Veículo:</strong> <span id="resumoVeiculo"></span></p>
+      <p><strong>Tipo:</strong> <span id="resumoTipo"></span></p>
+      <p><strong>KM ou Horímetro:</strong> <span id="kmPDF"></span></p>
+      <p><strong>Data e Hora:</strong> <span id="datetime-pdf"></span></p>
+    </div>
+
+    <table class="table" id="tabela">
+      <thead>
+        <tr>
+          <th>ITEM</th>
+          <th>BOM</th>
+          <th>ANORMAL</th>
+          <th>N.A.</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="obs-box">
+      <label>Observações</label>
+      <div id="obs-pdf"></div>
+    </div>
+  </div>
+
+  <!-- RODAPÉ -->
+  <div class="rodape">
+    Endereço: Rua Exemplo, 123 - Cidade - CEP 00000-000
+  </div>
+</div>
 
   <!-- TELA 1: SELEÇÃO -->
   <div class="container tela ativa" id="tela-selecao">
@@ -227,7 +321,7 @@ button:disabled {
     <button id="pdfBtn" onclick="gerarPDF()">📄 Gerar PDF</button>
 
     <div class="rodape">
-      Endereço da empresa: Rua Exemplo, 123 - Cidade - CEP 00000-000
+      Endereço da empresa: Av. Beira Rio Sul, 1169 - Jardim California - Cuiabá - CEP 78070-500
     </div>
   </div>
 
@@ -278,11 +372,11 @@ function irParaChecklist(){
   modelos[tipo].forEach(item=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${item}</td>
-      <td class="bom" onclick="selecionar(this)">✔</td>
-      <td class="anormal" onclick="selecionar(this)">⚠</td>
-      <td class="na" onclick="selecionar(this)">N.A</td>
-    `;
+  <td>${item}</td>
+  <td class="bom" onclick="selecionar(this)"></td>
+  <td class="anormal" onclick="selecionar(this)"></td>
+  <td class="na" onclick="selecionar(this)"></td>
+`;
     tbody.appendChild(tr);
   });
 
@@ -380,4 +474,5 @@ if('serviceWorker' in navigator){
 </script>
 </body>
 </html>
+
 
